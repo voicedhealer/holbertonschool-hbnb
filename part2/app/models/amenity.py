@@ -28,9 +28,12 @@ class Amenity:
         # Ici, tu pourrais ajouter la logique de persistance (fichier, base de données...)
 
     def delete(self):
-        """Supprime l'amenity (simulateur de suppression)."""
-        # Ici, tu pourrais ajouter la logique de suppression réelle
-        print(f"Amenity '{self.name}' supprimée.")
+        """
+        Simule la suppression de l'amenity. 
+        Ici, on marque simplement l'objet comme supprimé.
+        """
+        self._deleted = True
+        print(f"Amenity '{self.name}' (id: {self.id}) supprimée.")
 
     @classmethod
     def create(cls, name: str):
