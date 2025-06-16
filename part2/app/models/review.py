@@ -15,13 +15,12 @@ class Review(BaseModel):
         self.place_id = place_id
         """UUID de l'endroit où l'avis a été écrit"""
 
-
         if not isinstance(text, str):
             raise ValueError("Text must be a string")
-        """Si l'avis n'est pas une chaine de caractère, il renvoie un message d'erreur """
+        """Si le texte n'est pas une chaine de caractère, il renvoie un message d'erreur """
 
         self.text = text
-        """Contenu du review"""
+        """Contenu de la review"""
 
         if not isinstance(rating, int):
             raise ValueError("Must be a number")
@@ -29,17 +28,17 @@ class Review(BaseModel):
 
         if rating < 1 or rating > 5:
             raise ValueError("Number must be between 1 and 5")
-        """Si le rating est inférieur à 1 ou supérieur à 5, il renvoie un message d'erreur """
+        """Si le rating est inférieur à 1 ou supérieur à 5, renvoie un message d'erreur """
 
         self.rating = rating
-        """le rating"""
+        """Le rating"""
 
         if not isinstance(comment, str):
             raise ValueError("Comment must be a string")
-        """SI le commentaire n'est pas une chaine de caractère, renvoie un message d'erreur"""
+        """Si le commentaire n'est pas une chaine de caractère, renvoie un message d'erreur"""
 
         self.comment = comment
-        """le commentaire en lui même"""
+        """Le commentaire en lui même"""
 
         self.date_submission = datetime.now()
-        """la date de la review"""
+        """La date de la review"""
