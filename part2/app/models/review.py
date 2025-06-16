@@ -4,7 +4,7 @@ class Review(BaseModel):
 
     
     def __init__(self, user_id, place_id, text, rating, comment=""):
-    """Initialise une review avec l'ID du user, id de l'endroit, le texte et texte facultatif"""
+    """Initialise une review avec l'ID du user, id de l'endroit, le texte et commentaire facultatif"""
 
         super().__init__()
         """Appelle le parent dans le constructeur"""
