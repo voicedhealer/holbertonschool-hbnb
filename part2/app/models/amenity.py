@@ -26,14 +26,6 @@ class Amenity:
         """Met à jour la date de modification (simulateur de sauvegarde)."""
         self.updated_at = datetime.now()
 
-    def delete(self):
-        """
-        Simule la suppression de l'amenity. 
-        Ici, on marque simplement l'objet comme supprimé.
-        """
-        self._deleted = True
-        print(f"Amenity '{self.name}' (id: {self.id}) supprimée.")
-
     @classmethod
     def create(cls, name: str):
         """Crée et retourne une nouvelle commodité."""
