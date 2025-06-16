@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 class User(BaseModel):
-    def __init__(self, first_name, last_name, email, password):
+    def __init__(self, first_name, last_name, email, password, is_admin):
         """
         Constructeur de la classe User.
         Initialise un nouvel utilisateur avec prénom, nom, email et mot de passe.
@@ -14,6 +14,7 @@ class User(BaseModel):
         self.last_name = last_name
         self.email = email
         self.password = password  # Mot de passe de l'utilisateur (à remplacer par un hash sécurisé en prod)
+        self.is_admin = is_admin
 
     def update(self, **kwargs):
         """
