@@ -25,7 +25,6 @@ class Amenity:
     def save(self):
         """Met à jour la date de modification (simulateur de sauvegarde)."""
         self.updated_at = datetime.now()
-        # Ici, tu pourrais ajouter la logique de persistance (fichier, base de données...)
 
     def delete(self):
         """
