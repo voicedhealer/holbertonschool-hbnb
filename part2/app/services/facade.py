@@ -25,6 +25,13 @@ class HBnBFacade:
             return None
         return {k: v for k, v in user.items() if k != 'password'}
 
+    def get_user_by_email(self, email):
+        users = self.user_repo.get_all()
+        for user in users:
+            if getattr(user, 'email', None) == email:
+                return user
+        return None
+
     def update_user(self, user_id, update_data):
         user = self.user_repo.update(user_id, update_data)
         if user is None:

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import uuid
 
 class Repository(ABC):
     @abstractmethod
@@ -38,6 +39,12 @@ class InMemoryRepository(Repository):
 
     def get_all(self):
         return list(self._storage.values())
+    
+    def create(self, obj):
+        if not hasattr(obj, 'id'):
+            obj.id = str(uuid.uuid4())
+        self._storage[obj.id] = obj
+        return obj
 
     def update(self, obj_id, data):
         obj = self.get(obj_id)
