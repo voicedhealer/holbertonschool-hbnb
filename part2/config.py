@@ -11,3 +11,4 @@ config = {
     'development': DevelopmentConfig,
     'default': DevelopmentConfig
 }
+print("config.py exécuté")
