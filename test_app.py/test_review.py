@@ -1,4 +1,4 @@
-from review import Review # importe la classe Review du fichier review
+from part2.app.models.review import Review
 import uuid # importe module qui genere les uuid
 
 # genere un uuid aleatoire pour l'utilisateur
