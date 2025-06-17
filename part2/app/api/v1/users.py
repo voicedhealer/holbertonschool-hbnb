@@ -1,9 +1,16 @@
 from flask import Blueprint, request, jsonify
 from app.models.user import User
+"""
+Module Flask pour la gestion des utilisateurs via une API RESTful.
 
+Ce module définit un blueprint Flask nommé 'users' qui expose plusieurs routes
+permettant de créer, lister, récupérer et mettre à jour des utilisateurs.
+Les utilisateurs sont stockés temporairement dans un dictionnaire en mémoire.
+Ce stockage doit être remplacé par une base de données ou un repository dans
+un environnement de production.
+"""
 users_bp = Blueprint('users', __name__)
 
-# Stockage temporaire (à remplacer par la base de données ou repository)
 users = {}
 
 @users_bp.route('/api/v1/users/', methods=['POST'])
