@@ -1,4 +1,5 @@
 from app.persistence.repository import InMemoryRepository
+from app.models.place import Place
 
 class HBnBFacade:
     def __init__(self):
@@ -50,7 +51,8 @@ class HBnBFacade:
     pour gérer les données non valides.
     """
     def create_place(self, place_data):
-        return self.place_repo.create(place_data)
+        place = Place(**place_data)
+        return self.place_repo.create(place)
 
     def get_all_places(self):
         return self.place_repo.get_all()
