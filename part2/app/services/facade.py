@@ -44,6 +44,11 @@ class HBnBFacade:
         return {k: v for k, v in user.items() if k != 'password'}
 
     # ---------- PLACE ----------
+    """
+    Ces méthodes gèrent la création, la récupération et la mise à jour des emplacements.
+    Pensez à utiliser des méthodes de définition personnalisées ou à générer des exceptions
+    pour gérer les données non valides.
+    """
     def create_place(self, place_data):
         return self.place_repo.create(place_data)
 

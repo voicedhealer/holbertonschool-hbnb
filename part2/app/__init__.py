@@ -7,6 +7,7 @@ from app.api.v1.reviews import review_ns
 
 def create_app():
     app = Flask(__name__)
+    app.debug = True
     api = Api(
         app,
         version='1.0',
