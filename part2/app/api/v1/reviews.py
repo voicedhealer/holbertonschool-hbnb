@@ -1,6 +1,7 @@
-
 from flask_restx import Namespace, Resource, fields
 from app.models.base import BaseModel
+from app.models.review import Review
+from flask import request
 
 # On crée un namespace pour regrouper toutes les routes liées aux reviews
 review_ns = Namespace("reviews", description="Reviews operations")
@@ -29,3 +30,12 @@ class ReviewListResource(Resource):
         # On retourne chaque review convertie en dictionnaire (car Review est une classe)
         # __dict__ transforme les attributs de l'objet en dictionnaire JSON-compatible
         return [review.__dict__ for review in review_storage]
+
+    @review_ns.expect(review_model, validate=True)
+    @review_ns.response(201, 'Review created successfully')
+    def post(self):
+        """Ajouter une review (temporairement en mémoire)"""
+        data = request.json
+        new_review = Review(**data)
+        review_storage.append(new_review)
+        return new_review.__dict__, 201

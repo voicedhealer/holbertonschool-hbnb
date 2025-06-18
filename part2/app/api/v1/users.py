@@ -5,7 +5,6 @@ Ce module expose une API RESTful permettant de créer, lister, récupérer et me
 Les réponses et les entrées sont validées et documentées automatiquement grâce à Flask-RESTX.
 """
 
-from http import HTTPStatus
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
 from app.models.base import BaseModel

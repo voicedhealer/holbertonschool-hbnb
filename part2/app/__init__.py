@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_restx import Api
-from app.api.v1.users import user_ns 
+from app.api.v1.users import user_ns
 from app.api.v1.amenities import amenity_ns
 from app.api.v1.places import place_ns
 from app.api.v1.reviews import review_ns

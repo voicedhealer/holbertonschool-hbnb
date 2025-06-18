@@ -1,30 +1,46 @@
 from app.models.base import BaseModel
 from datetime import datetime
-from flask_restx import Namespace
+from flask_restx import Namespace, Resource, fields
+from flask import request
+from app.services.facade import HBnBFacade
 
-place_ns = Namespace("places", description="Places operations")
+place_ns = Namespace('places', description='Place operations')
+facade = HBnBFacade()
 
-class Place(BaseModel):
-    def __init__(self, name, description, city, address, price, owner_id, **kwargs):
-        """
-        Constructeur de la classe Place.
-        Initialise un lieu avec ses attributs principaux.
-        """
-        super().__init__()
-        self.name = name  # Nom du lieu
-        self.description = description  # Description du lieu
-        self.city = city  # Ville
-        self.address = address  # Adresse précise
-        self.price = price  # Prix par nuit ou par séjour
-        self.owner_id = owner_id  # ID du propriétaire (User)
-        # Ajoute d'autres attributs spécifiques si besoin (nombre de chambres, etc.)
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+place_model = place_ns.model('Place', {
+    'name': fields.String(required=True),
+    'description': fields.String,
+    'city': fields.String,
+    'address': fields.String,
+    'price': fields.Float,
+    'owner_id': fields.String
+})
 
-    def update(self, **kwargs):
-        """
-        Met à jour les attributs du lieu avec les valeurs fournies.
-        """
-        for key, value in kwargs.items():
-            setattr(self, key, value)
-        self.updated_at = datetime.now()
+@place_ns.route('/')
+class PlaceList(Resource):
+    @place_ns.expect(place_model, validate=True)
+    @place_ns.response(201, 'Place created successfully')
+    def post(self):
+        """Créer un nouveau lieu"""
+        data = request.json
+        place = facade.create_place(data)
+        return place, 201
+
+    @place_ns.response(200, 'Liste des lieux récupérée avec succès')
+    def get(self):
+        """Récupérer la liste de tous les lieux"""
+        places = facade.get_all_places()
+        return places, 200
+
+# 👇 Ceci doit être en dehors de la classe précédente
+@place_ns.route('/<string:place_id>')
+@place_ns.response(404, 'Lieu non trouvé')
+@place_ns.param('place_id', 'Identifiant du lieu')
+class PlaceResource(Resource):
+    @place_ns.response(200, 'Lieu trouvé avec succès')
+    def get(self, place_id):
+        """Récupérer un lieu par son ID"""
+        place = facade.get_place(place_id)
+        if not place:
+            place_ns.abort(404, 'Lieu non trouvé')
+        return place, 200
