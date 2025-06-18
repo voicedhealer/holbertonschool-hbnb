@@ -24,13 +24,21 @@ class PlaceList(Resource):
         place = facade.create_place(data)
         return place, 201
 
-
     @place_ns.response(200, 'Liste des lieux récupérée avec succès')
     def get(self):
         """Récupérer la liste de tous les lieux"""
         places = facade.get_all_places()
         return places, 200
 
-    @place_ns.route('/<string:place_id>')
-    @place_ns.response(404, 'Lieu non trouvé')
-    @place_ns.param('place_id', 'Identifiant du lieu')
+# 👇 Ceci doit être en dehors de la classe précédente
+@place_ns.route('/<string:place_id>')
+@place_ns.response(404, 'Lieu non trouvé')
+@place_ns.param('place_id', 'Identifiant du lieu')
+class PlaceResource(Resource):
+    @place_ns.response(200, 'Lieu trouvé avec succès')
+    def get(self, place_id):
+        """Récupérer un lieu par son ID"""
+        place = facade.get_place(place_id)
+        if not place:
+            place_ns.abort(404, 'Lieu non trouvé')
+        return place, 200
