@@ -1,5 +1,6 @@
 from flask_restx import Namespace, Resource, fields
 from app.models.review import Review
+from flask import request
 
 # On crée un namespace pour regrouper toutes les routes liées aux reviews
 reviews_ns = Namespace('reviews', description='Operations related to reviews')
