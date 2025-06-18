@@ -1,5 +1,8 @@
-from models.base import BaseModel
+from app.models.base import BaseModel
 from datetime import datetime
+from flask_restx import Namespace
+
+place_ns = Namespace("places", description="Places operations")
 
 class Place(BaseModel):
     def __init__(self, name, description, city, address, price, owner_id, **kwargs):

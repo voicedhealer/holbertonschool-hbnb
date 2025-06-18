@@ -1,6 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services.facade import HBnBFacade
+from app.models.base import BaseModel
 
 # Crée le namespace
 amenity_ns = Namespace('amenities', description='Amenity operations')

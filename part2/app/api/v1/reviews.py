@@ -1,16 +1,16 @@
 
 from flask_restx import Namespace, Resource, fields
-from app.models.review import Review
+from app.models.base import BaseModel
 
 # On crée un namespace pour regrouper toutes les routes liées aux reviews
-reviews_ns = Namespace('reviews', description='Operations related to reviews')
+review_ns = Namespace("reviews", description="Reviews operations")
 
 # On crée une liste vide pour simuler une base de données temporaire
 review_storage = []
 
 # On définit le modèle (le format) que chaque review doit suivre
 # Cela sert pour valider les données entrantes et générer la doc Swagger
-review_model = reviews_ns.model('Review', {
+review_model = review_ns.model('Review', {
     'user_id': fields.String(required=True, description="ID of the user"),  # l'utilisateur qui a posté la review
     'place_id': fields.String(required=True, description="ID of the place"),  # le lieu concerné
     'text': fields.String(required=True, description="Text content of the review"),  # le contenu de la review
@@ -22,7 +22,7 @@ review_model = reviews_ns.model('Review', {
 class ReviewListResource(Resource):
 
     # On utilise un décorateur pour dire : "on renvoie une liste de review_model"
-    @reviews_ns.marshal_list_with(review_model)
+    @review_ns.marshal_list_with(review_model)
     def get(self):
         """Renvoyer toutes les reviews enregistrées (en mémoire)"""
         

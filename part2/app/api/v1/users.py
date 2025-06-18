@@ -8,8 +8,10 @@ Les réponses et les entrées sont validées et documentées automatiquement gr�
 from http import HTTPStatus
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
+from app.models.base import BaseModel
 
 api = Namespace('users', description='Opérations sur les utilisateurs')
+user_ns = Namespace("users", description="Users operations")
 
 # Modèle utilisateur pour la validation des entrées et la documentation Swagger
 user_model = api.model('User', {
