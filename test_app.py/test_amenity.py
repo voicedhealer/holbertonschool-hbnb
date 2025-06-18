@@ -1,4 +1,4 @@
-from amenity import Amenity  # adapte si ta classe est dans un autre fichier
+from part2.app.models.amenity import Amenity
 
 # Création d'une commodité
 wifi = Amenity.create("WiFi")

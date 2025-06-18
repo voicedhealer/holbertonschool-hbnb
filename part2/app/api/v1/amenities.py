@@ -1,57 +1,51 @@
-from flask import Flask, jsonify, request, abort
-from app.models.amenity import Amenity
+from flask_restx import Namespace, Resource, fields
+from flask import request
+from app.services.facade import HBnBFacade
 
-app = Flask(__name__)
+# Crée le namespace
+amenity_ns = Namespace('amenities', description='Amenity operations')
 
-# Stockage temporaire en mémoire
-amenities = {}
+# Modèle de données pour la documentation et la validation
+amenity_model = amenity_ns.model('Amenity', {
+    'id': fields.String(readonly=True, description='Amenity ID'),
+    'name': fields.String(required=True, description='Amenity name')
+})
 
-# Helper pour retrouver une amenity
-def get_amenity_or_404(amenity_id):
-    amenity = amenities.get(amenity_id)
-    if amenity is None or getattr(amenity, "_deleted", False):
-        abort(404, description="Amenity not found")
-    return amenity
+# Instancie la façade (business logic)
+facade = HBnBFacade()
 
-# GET /amenities — Liste toutes les amenities
-@app.route('/amenities', methods=['GET'])
-def get_amenities():
-    return jsonify([a.to_dict() for a in amenities.values() if not getattr(a, "_deleted", False)])
+@amenity_ns.route('/')
+class AmenityList(Resource):
+    @amenity_ns.marshal_list_with(amenity_model)
+    def get(self):
+        """Liste toutes les amenities"""
+        return facade.get_all_amenities()
 
-# GET /amenities/<id> — Détail d’une amenity
-@app.route('/amenities/<amenity_id>', methods=['GET'])
-def get_amenity(amenity_id):
-    amenity = get_amenity_or_404(amenity_id)
-    return jsonify(amenity.to_dict())
+    @amenity_ns.expect(amenity_model, validate=True)
+    @amenity_ns.marshal_with(amenity_model, code=201)
+    def post(self):
+        """Crée une nouvelle amenity"""
+        data = request.json
+        return facade.create_amenity(data), 201
 
-# POST /amenities — Créer une amenity
-@app.route('/amenities', methods=['POST'])
-def create_amenity():
-    data = request.get_json()
-    name = data.get('name')
-    if not name:
-        abort(400, description="Missing name")
-    amenity = Amenity.create(name)
-    amenities[str(amenity.id)] = amenity
-    return jsonify(amenity.to_dict()), 201
+@amenity_ns.route('/<string:amenity_id>')
+@amenity_ns.response(404, 'Amenity not found')
+@amenity_ns.param('amenity_id', 'L\'identifiant de l\'amenity')
+class AmenityResource(Resource):
+    @amenity_ns.marshal_with(amenity_model)
+    def get(self, amenity_id):
+        """Récupère une amenity par ID"""
+        amenity = facade.get_amenity(amenity_id)
+        if amenity is None:
+            amenity_ns.abort(404, "Amenity not found")
+        return amenity
 
-# PUT /amenities/<id> — Modifier une amenity
-@app.route('/amenities/<amenity_id>', methods=['PUT'])
-def update_amenity(amenity_id):
-    amenity = get_amenity_or_404(amenity_id)
-    data = request.get_json()
-    name = data.get('name')
-    if name:
-        amenity.update(name=name)
-    return jsonify(amenity.to_dict())
-
-# DELETE /amenities/<id> — Supprimer une amenity
-@app.route('/amenities/<amenity_id>', methods=['DELETE'])
-def delete_amenity(amenity_id):
-    amenity = get_amenity_or_404(amenity_id)
-    amenity.delete()
-    return jsonify({"result": True})
-
-if __name__ == "__main__":
-    from flask import Flask
-    app.run(debug=True)
+    @amenity_ns.expect(amenity_model, validate=True)
+    @amenity_ns.marshal_with(amenity_model)
+    def put(self, amenity_id):
+        """Met à jour une amenity"""
+        data = request.json
+        amenity = facade.update_amenity(amenity_id, data)
+        if amenity is None:
+            amenity_ns.abort(404, "Amenity not found")
+        return amenity

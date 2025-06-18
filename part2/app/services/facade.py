@@ -31,6 +31,11 @@ class HBnBFacade:
             if getattr(user, 'email', None) == email:
                 return user
         return None
+    
+    def list_users(self):
+        """Retourne la liste de tous les utilisateurs sous forme de dictionnaires."""
+        users = self.user_repo.get_all()
+        return [user if isinstance(user, dict) else user.__dict__ for user in users]
 
     def update_user(self, user_id, update_data):
         user = self.user_repo.update(user_id, update_data)
