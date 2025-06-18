@@ -58,6 +58,13 @@ class HBnBFacade:
 
     # ---------- REVIEW ----------
     def create_review(self, review_data):
+        # Validation
+        if not review_data.get('text'):
+            raise ValueError("Review text is required")
+        if not self.user_repo.get(review_data['user_id']):
+            raise ValueError("User does not exist")
+        if not self.place_repo.get(review_data['place_id']):
+            raise ValueError("Place does not exist")
         return self.review_repo.create(review_data)
 
     def get_all_reviews(self):
@@ -67,7 +74,11 @@ class HBnBFacade:
         return self.review_repo.get(review_id)
 
     def update_review(self, review_id, update_data):
+        # Validation similaire à create_review
         return self.review_repo.update(review_id, update_data)
+    
+    def delete_review(self, review_id):
+        return self.review_repo.delete(review_id)
 
     # ---------- AMENITY ----------
     def create_amenity(self, amenity_data):

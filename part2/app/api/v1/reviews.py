@@ -1,41 +1,71 @@
 from flask_restx import Namespace, Resource, fields
-from app.models.base import BaseModel
-from app.models.review import Review
 from flask import request
+from app.services.facade import HBnBFacade
 
-# On crée un namespace pour regrouper toutes les routes liées aux reviews
+# Création du namespace pour toutes les routes liées aux reviews
 review_ns = Namespace("reviews", description="Reviews operations")
 
-# On crée une liste vide pour simuler une base de données temporaire
-review_storage = []
-
-# On définit le modèle (le format) que chaque review doit suivre
-# Cela sert pour valider les données entrantes et générer la doc Swagger
+# Définition du modèle de données pour une review (pour validation et documentation Swagger)
 review_model = review_ns.model('Review', {
-    'user_id': fields.String(required=True, description="ID of the user"),  # l'utilisateur qui a posté la review
-    'place_id': fields.String(required=True, description="ID of the place"),  # le lieu concerné
-    'text': fields.String(required=True, description="Text content of the review"),  # le contenu de la review
-    'rating': fields.Integer(required=True, description="Rating from 1 to 5"),  # la note
-    'comment': fields.String(required=False, description="Optional comment")  # commentaire facultatif
+    'id': fields.String(readonly=True, description='Review ID'),  # ID unique de la review
+    'user_id': fields.String(required=True, description="ID of the user"),  # ID de l'utilisateur
+    'place_id': fields.String(required=True, description="ID of the place"),  # ID du lieu
+    'text': fields.String(required=True, description="Text content of the review"),  # Contenu de la review
+    'rating': fields.Integer(required=True, description="Rating from 1 to 5"),  # Note de 1 à 5
+    'comment': fields.String(description="Optional comment")  # Commentaire optionnel
 })
 
-# On définit une ressource pour gérer la route GET /reviews
-class ReviewListResource(Resource):
+# Instanciation de la façade (logique métier)
+facade = HBnBFacade()
 
-    # On utilise un décorateur pour dire : "on renvoie une liste de review_model"
+# Route pour gérer la collection de reviews (GET toutes, POST une nouvelle)
+@review_ns.route('/')
+class ReviewList(Resource):
     @review_ns.marshal_list_with(review_model)
     def get(self):
-        """Renvoyer toutes les reviews enregistrées (en mémoire)"""
-        
-        # On retourne chaque review convertie en dictionnaire (car Review est une classe)
-        # __dict__ transforme les attributs de l'objet en dictionnaire JSON-compatible
-        return [review.__dict__ for review in review_storage]
+        """Liste toutes les reviews"""
+        # Appelle la façade pour récupérer toutes les reviews
+        return facade.get_all_reviews()
 
     @review_ns.expect(review_model, validate=True)
-    @review_ns.response(201, 'Review created successfully')
+    @review_ns.marshal_with(review_model, code=201)
     def post(self):
-        """Ajouter une review (temporairement en mémoire)"""
-        data = request.json
-        new_review = Review(**data)
-        review_storage.append(new_review)
-        return new_review.__dict__, 201
+        """Crée une nouvelle review"""
+        data = request.json  # Récupère les données envoyées par le client
+        # Appelle la façade pour créer la review et retourne la réponse
+        return facade.create_review(data), 201
+
+# Route pour gérer une review individuelle (GET, PUT, DELETE par ID)
+@review_ns.route('/<string:review_id>')
+class ReviewResource(Resource):
+    @review_ns.marshal_with(review_model)
+    def get(self, review_id):
+        """Récupère une review par ID"""
+        # Appelle la façade pour récupérer la review
+        review = facade.get_review(review_id)
+        if not review:
+            # Si la review n'existe pas, retourne une erreur 404
+            review_ns.abort(404, "Review not found")
+        return review
+
+    @review_ns.expect(review_model, validate=True)
+    @review_ns.marshal_with(review_model)
+    def put(self, review_id):
+        """Met à jour une review"""
+        data = request.json  # Données de mise à jour
+        # Appelle la façade pour mettre à jour la review
+        review = facade.update_review(review_id, data)
+        if not review:
+            # Si la review n'existe pas, retourne une erreur 404
+            review_ns.abort(404, "Review not found")
+        return review
+
+    def delete(self, review_id):
+        """Supprime une review"""
+        # Appelle la façade pour supprimer la review
+        deleted = facade.delete_review(review_id)
+        if not deleted:
+            # Si la review n'existe pas, retourne une erreur 404
+            review_ns.abort(404, "Review not found")
+        # Retourne un code 204 (No Content) si la suppression a réussi
+        return '', 204

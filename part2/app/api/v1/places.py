@@ -13,7 +13,8 @@ place_model = place_ns.model('Place', {
     'city': fields.String,
     'address': fields.String,
     'price': fields.Float,
-    'owner_id': fields.String
+    'owner_id': fields.String,
+    'reviews': fields.List(fields.String, description='List of review IDs')
 })
 
 @place_ns.route('/')
@@ -43,4 +44,6 @@ class PlaceResource(Resource):
         place = facade.get_place(place_id)
         if not place:
             place_ns.abort(404, 'Lieu non trouvé')
+        reviews = [r['id'] for r in facade.get_all_reviews() if r['place_id'] == place_id]
+        place['reviews'] = reviews
         return place, 200
