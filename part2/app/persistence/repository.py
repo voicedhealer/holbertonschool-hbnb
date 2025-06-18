@@ -42,7 +42,7 @@ class InMemoryRepository(Repository):
     
     def create(self, obj):
         if not hasattr(obj, 'id'):
-            obj.id = str(uuid.uuid4())
+            obj['id'] = str(uuid.uuid4())
         self._storage[obj.id] = obj
         return obj
 
