@@ -22,7 +22,10 @@ class User(BaseModel):
         """
         Met à jour les attributs de l'utilisateur avec les valeurs fournies dans kwargs.
         Met également à jour la date de modification (updated_at).
+        Ne permet pas de modifier 'id', 'created_at', ou 'updated_at'.
         """
+        protected_fields = {'id', 'created_at', 'updated_at'}
         for key, value in kwargs.items():
-            setattr(self, key, value)  # Met à jour chaque attribut passé en argument
-        self.updated_at = datetime.now()  # Met à jour la date de dernière modification
+            if key not in protected_fields:
+                setattr(self, key, value)
+        self.updated_at = datetime.now()
