@@ -4,7 +4,7 @@ import uuid
 
 
 class User(BaseModel):
-    def __init__(self, first_name, last_name, email, password, is_admin):
+    def __init__(self, first_name, last_name, email, password=None, is_admin=False):
         """
         Constructeur de la classe User.
         Initialise un nouvel utilisateur avec prénom, nom, email et mot de passe.
