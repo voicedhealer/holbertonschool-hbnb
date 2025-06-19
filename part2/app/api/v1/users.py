@@ -10,7 +10,6 @@ from app.services import facade
 from app.models.base import BaseModel
 
 api = Namespace('users', description='Opérations sur les utilisateurs')
-user_ns = Namespace("users", description="Users operations")
 
 # Modèle utilisateur pour la validation des entrées et la documentation Swagger
 user_model = api.model('User', {
@@ -79,3 +78,4 @@ class UserResource(Resource):
         if not updated_user:
             api.abort(404, "Utilisateur non trouvé")
         return updated_user, 200
+user_ns = api
