@@ -4,13 +4,14 @@ class Place(BaseModel):
     """
     class Place 
     """
-    def __init__(self, title, description, price, latitude, longitude, owner):
+    def __init__(self, title, description, price, latitude, longitude, name, owner):
         super().__init__()
         self.title = title
         self.description = description
         self.price = price
         self.latitude = latitude
         self.longitude = longitude
+        self.name = name
         self.owner = owner
         self.reviews = []
         self.amenities = []
