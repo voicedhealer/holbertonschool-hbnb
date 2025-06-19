@@ -36,8 +36,8 @@ class UserList(Resource):
         existing_user = facade.get_user_by_email(user_data['email'])
         if existing_user:
             api.abort(400, "Email déjà enregistré")
-        new_user = facade.create_user(user_data)
-        return new_user, 201
+        user = facade.create_user(user_data)
+        return user, 201
 
     @api.marshal_list_with(user_model)
     @api.response(200, 'Liste des utilisateurs récupérée avec succès')
