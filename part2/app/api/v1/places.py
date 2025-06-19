@@ -2,10 +2,9 @@ from app.models.base import BaseModel
 from datetime import datetime
 from flask_restx import Namespace, Resource, fields
 from flask import request
-from app.services.facade import HBnBFacade
+from app.services import facade
 
 place_ns = Namespace('places', description='Place operations')
-facade = HBnBFacade()
 
 place_model = place_ns.model('Place', {
     'name': fields.String(required=True),
@@ -33,7 +32,7 @@ class PlaceList(Resource):
         places = facade.get_all_places()
         return places, 200
 
-# 👇 Ceci doit être en dehors de la classe précédente
+# Ceci doit être en dehors de la classe précédente
 @place_ns.route('/<string:place_id>')
 @place_ns.response(404, 'Lieu non trouvé')
 @place_ns.param('place_id', 'Identifiant du lieu')
