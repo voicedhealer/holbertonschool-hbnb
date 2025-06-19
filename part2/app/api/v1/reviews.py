@@ -1,6 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 from flask import request
-from app.services.facade import HBnBFacade
+from app.services import facade
+
 
 # Création du namespace pour toutes les routes liées aux reviews
 review_ns = Namespace("reviews", description="Reviews operations")
@@ -14,9 +15,6 @@ review_model = review_ns.model('Review', {
     'rating': fields.Integer(required=True, description="Rating from 1 to 5"),  # Note de 1 à 5
     'comment': fields.String(description="Optional comment")  # Commentaire optionnel
 })
-
-# Instanciation de la façade (logique métier)
-facade = HBnBFacade()
 
 # Route pour gérer la collection de reviews (GET toutes, POST une nouvelle)
 @review_ns.route('/')

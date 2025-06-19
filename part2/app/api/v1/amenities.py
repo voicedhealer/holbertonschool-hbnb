@@ -1,7 +1,6 @@
 from flask_restx import Namespace, Resource, fields
 from flask import request
-from app.services.facade import HBnBFacade
-from app.models.base import BaseModel
+from app.services import facade
 
 # Crée le namespace
 amenity_ns = Namespace('amenities', description='Amenity operations')
@@ -11,9 +10,6 @@ amenity_model = amenity_ns.model('Amenity', {
     'id': fields.String(readonly=True, description='Amenity ID'),
     'name': fields.String(required=True, description='Amenity name')
 })
-
-# Instancie la façade (business logic)
-facade = HBnBFacade()
 
 @amenity_ns.route('/')
 class AmenityList(Resource):

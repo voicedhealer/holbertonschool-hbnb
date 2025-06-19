@@ -14,11 +14,22 @@ class HBnBFacade:
 
     # ---------- USER ----------
     def create_user(self, user_data):
-        user = User(**user_data)  # transform dict into a real User object
+    # Vérifie que tous les champs requis sont présents
+        if not user_data.get('first_name') or not user_data.get('last_name') or not user_data.get('email'):
+            return {"message": "Missing required fields"}, 400
+
+    # Vérifie que l'email n'existe pas déjà
+        existing = self.get_user_by_email(user_data['email'])
+        if existing:
+            return {"message": "Email already exists"}, 400
+
+    # Crée l'utilisateur si tout est bon
+        user = User(**user_data)
         user = self.user_repo.create(user)
         if hasattr(user, 'password'):
             user.password = None
         return user.__dict__
+
 
     def get_all_users(self):
         users = self.user_repo.get_all()

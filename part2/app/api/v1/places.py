@@ -1,9 +1,8 @@
 from flask_restx import Namespace, Resource, fields
 from flask import request
-from app.services.facade import HBnBFacade
+from app.services import facade
 
 place_ns = Namespace('places', description='Place operations')
-facade = HBnBFacade()
 
 # Modèle pour la documentation Swagger
 place_model = place_ns.model('Place', {
