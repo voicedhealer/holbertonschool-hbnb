@@ -1,4 +1,4 @@
-from base import BaseModel
+from app.models.base import BaseModel
 from datetime import datetime
 import uuid
 
