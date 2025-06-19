@@ -13,7 +13,7 @@ app = create_app()
 
 if __name__ == "__main__":
     # Ouvre Swagger UI automatiquement
-    webbrowser.open("http://localhost:5000/api/v1/")
+    webbrowser.open("http://localhost:5001/api/v1/")
     
     # Lance le serveur sur le port 5000
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5001)
