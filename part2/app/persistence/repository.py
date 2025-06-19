@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import uuid
+from typing import List, Any
 
 class Repository(ABC):
     @abstractmethod
@@ -11,7 +12,7 @@ class Repository(ABC):
         pass
 
     @abstractmethod
-    def get_all(self):
+    def get_all(self) -> list:
         pass
 
     @abstractmethod
@@ -37,7 +38,7 @@ class InMemoryRepository(Repository):
     def get(self, obj_id):
         return self._storage.get(obj_id)
 
-    def get_all(self):
+    def get_all(self) -> list:
         return list(self._storage.values())
     
     def create(self, obj):
