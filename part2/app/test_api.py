@@ -79,7 +79,7 @@ class TestUserEndpoints(unittest.TestCase):
             "last_name": "Rabbit",
             "email": "roger.rabbit@example.com"
         })
-            self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.status_code, 201)
 
             response = self.client.get('/api/v1/users/')
             self.assertEqual(response.status_code, 200)

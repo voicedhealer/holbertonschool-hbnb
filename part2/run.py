@@ -11,6 +11,13 @@ from app import create_app
 
 app = create_app()
 
+# === Test endpoint pour debug POST ===
+@app.route('/test_post', methods=['POST'])
+def test_post():
+    print("DEBUG: /test_post called")
+    return {"ok": True}
+# === Fin test endpoint ===
+
 if __name__ == "__main__":
     # Ouvre Swagger UI automatiquement
     webbrowser.open("http://localhost:5001/api/v1/")

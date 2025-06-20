@@ -69,7 +69,7 @@ class HBnBFacade:
         # Exclure le mot de passe avant de retourner les données
         user_dict = created_user.__dict__
         user_dict.pop('password', None)
-        return user_dict
+        return created_user.to_dict()
 
     def get_all_users(self) -> List[Dict[str, Any]]:
         """Récupère une liste de tous les utilisateurs."""
