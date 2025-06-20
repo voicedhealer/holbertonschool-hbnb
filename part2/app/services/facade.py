@@ -129,6 +129,12 @@ class HBnBFacade:
         user_dict.pop('password', None)
         return user_dict
 
+    def list_users(self):
+        """Retourne la liste de tous les utilisateurs sous forme de dictionnaires."""
+        users = self.user_repo.get_all()
+        # Si vos utilisateurs sont des objets, convertissez-les en dicts si besoin
+        return [user if isinstance(user, dict) else user.__dict__ for user in users]
+
     # ===========================
     # Opérations sur les Places
     # ===========================
@@ -218,7 +224,10 @@ class HBnBFacade:
 
     def get_amenity(self, amenity_id: str) -> Optional[Dict[str, Any]]:
         """Récupère une commodité par son ID."""
-        amenity = self.amenity_repo.get(amenity_id)
+        from uuid import UUID
+        print(self.amenity_repo._storage.keys())
+        uuid = UUID(amenity_id)
+        amenity = self.amenity_repo.get(uuid)
         return amenity.__dict__ if amenity else None
 
     def update_amenity(self, amenity_id: str, update_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
