@@ -2,7 +2,6 @@
 Module définissant le modèle de données pour un 'Place'.
 """
 from typing import List, Optional, TYPE_CHECKING
-
 from app.models.base import BaseModel
 
 # Pour éviter les importations circulaires tout en gardant le type hinting
