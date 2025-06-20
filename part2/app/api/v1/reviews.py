@@ -105,23 +105,3 @@ class ReviewResource(Resource):
         if not review:
             review_ns.abort(404, f"Review avec l'ID {review_id} non trouvée.")
         return review
-
-    @review_ns.doc('delete_review')
-    @review_ns.response(204, 'Review supprimée avec succès.')
-    def delete(self, review_id):
-        """
-        Supprime une review par son identifiant.
-
-        En cas de succès, cette opération ne retourne aucun contenu dans le corps
-        de la réponse, seulement un code de statut HTTP 204 (No Content).
-
-        Args:
-            review_id (str): L'identifiant de la review à supprimer.
-
-        Returns:
-            tuple: Une réponse vide avec un code de statut 204.
-                   Provoque une erreur 404 si l'ID n'existe pas.
-        """
-        if not facade.delete_review(review_id):
-            review_ns.abort(404, f"Review avec l'ID {review_id} non trouvée.")
-        return '', 204
