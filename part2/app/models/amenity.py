@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime
 from app.models.base import BaseModel
+from typing import Optional
 
 class Amenity:
     """
@@ -17,6 +18,8 @@ class Amenity:
         - update() : modifie la commodité
     """
     def __init__(self, name: str):
+        if name is None:
+            raise ValueError("Le nom de la commodité ne peut pas être None")
         self.id = uuid.uuid4()
         self.name = name
         self.created_at = datetime.now()
@@ -31,7 +34,7 @@ class Amenity:
         """Crée et retourne une nouvelle commodité."""
         return cls(name)
 
-    def update(self, name: str = None):
+    def update(self, name: Optional[str] = None):
         """Modifie la commodité (ex : changer le nom)."""
         if name:
             self.name = name
