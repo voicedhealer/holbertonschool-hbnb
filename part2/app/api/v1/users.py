@@ -7,7 +7,7 @@ Les réponses et les entrées sont validées et documentées automatiquement gr�
 
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
-from app.models.base import BaseModel
+import re
 
 api = Namespace('users', description='Opérations sur les utilisateurs')
 
@@ -19,20 +19,40 @@ user_model = api.model('User', {
     'email': fields.String(required=True, description='Adresse email de l\'utilisateur')
 })
 
+def is_valid_email(email):
+    # Expression régulière simple pour valider un email
+    return re.match(r"[^@]+@[^@]+\.[^@]+", email) is not None
+
+def validate_user_data(user_data):
+    errors = []
+    if not user_data.get('first_name') or not user_data['first_name'].strip():
+        errors.append("Le prénom ne peut pas être vide.")
+    if not user_data.get('last_name') or not user_data['last_name'].strip():
+        errors.append("Le nom de famille ne peut pas être vide.")
+    if not user_data.get('email') or not is_valid_email(user_data['email']):
+        errors.append("L'adresse email est invalide.")
+    return errors
+
 @api.route('/')
 class UserList(Resource):
     @api.expect(user_model, validate=True)
     @api.marshal_with(user_model, code=201)
     @api.response(201, 'Utilisateur créé avec succès')
-    @api.response(400, 'Email déjà enregistré')
+    @api.response(400, 'Données invalides ou email déjà enregistré')
     def post(self):
         """
         Créer un nouvel utilisateur.
 
-        Vérifie l'unicité de l'email avant la création.
+        Vérifie l'unicité de l'email et la validité des champs avant la création.
         Retourne l'utilisateur créé.
         """
         user_data = api.payload
+
+        # Validation personnalisée
+        errors = validate_user_data(user_data)
+        if errors:
+            api.abort(400, " ; ".join(errors))
+
         existing_user = facade.get_user_by_email(user_data['email'])
         if existing_user:
             api.abort(400, "Email déjà enregistré")
@@ -69,13 +89,21 @@ class UserResource(Resource):
     @api.marshal_with(user_model)
     @api.response(200, 'Utilisateur mis à jour avec succès')
     @api.response(404, 'Utilisateur non trouvé')
+    @api.response(400, 'Données invalides')
     def put(self, user_id):
         """
         Mettre à jour les informations d'un utilisateur par son identifiant.
         """
         user_data = api.payload
+
+        # Validation personnalisée
+        errors = validate_user_data(user_data)
+        if errors:
+            api.abort(400, " ; ".join(errors))
+
         updated_user = facade.update_user(user_id, user_data)
         if not updated_user:
             api.abort(404, "Utilisateur non trouvé")
         return updated_user, 200
+
 user_ns = api
