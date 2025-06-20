@@ -16,4 +16,4 @@ if __name__ == "__main__":
     webbrowser.open("http://localhost:5001/api/v1/")
     
     # Lance le serveur sur le port 5001
-    app.run(host='0.0.0.0', port=5001)
+    app.run(debug=True, host='0.0.0.0', port=5001)
