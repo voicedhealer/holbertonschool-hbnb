@@ -22,5 +22,6 @@ if __name__ == "__main__":
     # Ouvre Swagger UI automatiquement
     webbrowser.open("http://localhost:5001/api/v1/")
     
+    print(app.url_map)
     # Lance le serveur sur le port 5001
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    app.run(debug=True, host='0.0.0.0', port=5005)

@@ -42,7 +42,7 @@ class HBnBFacade:
     # Opérations sur les Users
     # ==========================
 
-    def create_user(self, user_data: Dict[str, Any]) -> Union[Tuple[Dict[str, Any], int], Dict[str, Any]]:
+    def create_user(self, user_data):
         """
         Crée un nouvel utilisateur après validation.
 
@@ -51,25 +51,25 @@ class HBnBFacade:
         2.  Vérifie que l'adresse email n'est pas déjà utilisée.
 
         Args:
-            user_data (Dict[str, Any]): Dictionnaire contenant les données du nouvel utilisateur.
+        user_data (Dict[str, Any]): Dictionnaire contenant les données du nouvel utilisateur.
 
         Returns:
-            Sur succès, un dictionnaire représentant le nouvel utilisateur (sans le mot de passe).
-            En cas d'échec de validation, un tuple `(dict_erreur, code_http)`.
+        Tuple: (dictionnaire utilisateur ou message d'erreur, code HTTP)
         """
+        # Validation des champs requis
         if not all(user_data.get(key) for key in ['first_name', 'last_name', 'email']):
             return {"message": "Missing required fields"}, 400
 
+        # Vérification de l'unicité de l'email
         if self.get_user_by_email(user_data['email']):
             return {"message": "Email already exists"}, 400
 
+        # Création de l'utilisateur
         user = User(**user_data)
         created_user = self.user_repo.create(user)
-
-        # Exclure le mot de passe avant de retourner les données
-        user_dict = created_user.__dict__
+        user_dict = created_user.to_dict()  # Assure-toi que to_dict() retourne 'id'
         user_dict.pop('password', None)
-        return created_user.to_dict()
+        return user_dict, 201
 
     def get_all_users(self) -> List[Dict[str, Any]]:
         """Récupère une liste de tous les utilisateurs."""

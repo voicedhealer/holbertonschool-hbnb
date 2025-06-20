@@ -35,9 +35,9 @@ class User(BaseModel):
         sans le mot de passe ni les champs sensibles.
         """
         return {
-            'id': self.id,
-            'first_name': self.first_name,
-            'last_name': self.last_name,
-            'email': self.email
+        "id": self.id,
+        "first_name": self.first_name,
+        "last_name": self.last_name,
+        "email": self.email
             # Ajoute ici d'autres champs publics si besoin, mais jamais le mot de passe !
         }

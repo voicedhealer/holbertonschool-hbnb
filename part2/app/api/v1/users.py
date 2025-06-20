@@ -41,34 +41,31 @@ class UserList(Resource):
     @api.response(400, 'Données invalides ou email déjà enregistré')
     def post(self):
         print("DEBUG: POST /api/v1/users/ called")
-        """
-        Créer un nouvel utilisateur.
-        Vérifie l'unicité de l'email et la validité des champs avant la création.
-        Retourne l'utilisateur créé.
-        """
         user_data = api.payload
+        print("user_data reçu:", user_data)
 
         # Validation personnalisée
         errors = validate_user_data(user_data)
         if errors:
+            print("Validation errors:", errors)
             api.abort(400, " ; ".join(errors))
 
         # Vérification de l'unicité de l'email
         existing_user = facade.get_user_by_email(user_data['email'])
         if existing_user:
+            print("Email déjà enregistré:", user_data['email'])
             api.abort(400, "Email déjà enregistré")
 
-        try:
-            new_user = facade.create_user(user_data)
-        except Exception as e:
-            api.abort(500, f"Erreur interne lors de la création de l'utilisateur : {e}")
+        # Création de l'utilisateur avec debug
+        user_dict, code = facade.create_user(user_data)
+        print("user_dict retourné:", user_dict, "code:", code)
 
-        # Vérification finale de la structure du retour
-        if not isinstance(new_user, dict) or 'id' not in new_user:
+        # Vérification finale (par sécurité)
+        if not isinstance(user_dict, dict) or 'id' not in user_dict:
+            print("ERREUR: utilisateur créé sans 'id'")
             api.abort(500, "Erreur interne : l'utilisateur créé n'a pas d'identifiant.")
 
-        print("DEBUG new_user:", new_user)
-        return new_user, 201
+        return user_dict, code
 
     @api.marshal_list_with(user_model)
     @api.response(200, 'Liste des utilisateurs récupérée avec succès')
@@ -118,4 +115,12 @@ class UserResource(Resource):
             api.abort(404, "Utilisateur non trouvé")
         return updated_user, 200
 
+# Ajoute une route de reset pour les tests, temporaire
+@api.route('/_reset')
+class UserReset(Resource):
+    def post(self):
+        # Vide le repo utilisateur pour les tests
+        facade.user_repo._storage.clear()
+        return {"status": "reset"}, 200
+    
 user_ns = api
