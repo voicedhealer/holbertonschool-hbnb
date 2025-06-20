@@ -6,7 +6,7 @@ pour interagir avec la logique métier et la couche de persistance de données.
 Elle simplifie l'interface pour les couches supérieures (comme l'API REST)
 en orchestrant les opérations sur les différents dépôts de données.
 """
-from typing import List, Dict, Optional, Any, Tuple
+from typing import List, Dict, Optional, Any, Tuple, Union
 
 from app.persistence.repository import InMemoryRepository
 from app.models.user import User
@@ -42,7 +42,7 @@ class HBnBFacade:
     # Opérations sur les Users
     # ==========================
 
-    def create_user(self, user_data: Dict[str, Any]) -> Tuple[Dict[str, Any], int] | Dict[str, Any]:
+    def create_user(self, user_data: Dict[str, Any]) -> Union[Tuple[Dict[str, Any], int], Dict[str, Any]]:
         """
         Crée un nouvel utilisateur après validation.
 
