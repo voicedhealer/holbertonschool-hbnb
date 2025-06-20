@@ -21,7 +21,7 @@ class HBnBFacade:
     # Vérifie que l'email n'existe pas déjà
         existing = self.get_user_by_email(user_data['email'])
         if existing:
-            return {"message": "Email already exists"}, 400
+            return {"message": "Email already exists"},  400
 
     # Crée l'utilisateur si tout est bon
         user = User(**user_data)

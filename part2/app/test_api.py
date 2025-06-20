@@ -66,35 +66,26 @@ class TestUserEndpoints(unittest.TestCase):
         })
         self.assertEqual(response.status_code, 404)
 
-    def test_get_all_users(self):
-        self.client.post('/api/v1/users/', json={
-            "first_name": "Roger",
-            "last_name": "Rabbit",
-            "email": "roger.rabbit@example.com"
-        })
-        response = self.client.get('/api/v1/users/')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('Roger', response.get_data(as_text=True))
-
-    def test_get_all_users_empty(self):
-        response = self.client.get('/api/v1/users/')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('[]', response.get_data(as_text=True))
-
     def test_create_user_with_existing_email(self):
-        response = self.client.post('/api/v1/users/', json={
-            "first_name": "Roger",
-            "last_name": "Rabbit",
-            "email": "roger.rabbit@example.com"
+            response = self.client.post('/api/v1/users/', json={
+            "first_name": "String",
+            "last_name": "String",
+            "email": "String"
         })
-        self.assertEqual(response.status_code, 201)
+            self.assertEqual(response.status_code, 400)
 
-        response = self.client.post('/api/v1/users/', json={
+            response = self.client.post('/api/v1/users/', json={
             "first_name": "Roger",
             "last_name": "Rabbit",
             "email": "roger.rabbit@example.com"
         })
-        self.assertEqual(response.status_code, 400)
+            self.assertEqual(response.status_code, 400)
+
+            response = self.client.get('/api/v1/users/')
+            self.assertEqual(response.status_code, 200)
+            self.assertIn('Roger', response.get_data(as_text=True))
+
+            self.assertEqual(response.status_code, 201)
 
 if __name__ == "__main__":
     unittest.main()

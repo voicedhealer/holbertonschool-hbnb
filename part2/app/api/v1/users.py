@@ -24,19 +24,29 @@ class UserList(Resource):
     @api.expect(user_model, validate=True)
     @api.marshal_with(user_model, code=201)
     @api.response(201, 'Utilisateur créé avec succès')
-    @api.response(400, 'Email déjà enregistré')
+    @api.response(400, 'Données invalides ou email déjà enregistré')
     def post(self):
         """
         Créer un nouvel utilisateur.
-
-        Vérifie l'unicité de l'email avant la création.
-        Retourne l'utilisateur créé.
+        Vérifie l'unicité de l'email et la validité des données avant la création.
         """
         user_data = api.payload
+
+        # Vérification des champs obligatoires
+        if not user_data.get('first_name') or not user_data.get('last_name') or not user_data.get('email'):
+            api.abort(400, "Champs obligatoires manquants ou vides")
+
+        # Vérification du format de l'email (simple)
+        if '@' not in user_data['email']:
+            api.abort(400, "Format d'email invalide")
+
         existing_user = facade.get_user_by_email(user_data['email'])
         if existing_user:
-            api.abort(400, "Email déjà enregistré")
+            return existing_user, 400  # Email déjà enregistré
+
         user = facade.create_user(user_data)
+        if 'id' not in user:
+            api.abort(500, "Erreur interne : l'utilisateur créé n'a pas d'identifiant")
         return user, 201
 
     @api.marshal_list_with(user_model)
