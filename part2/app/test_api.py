@@ -59,7 +59,7 @@ class TestUserEndpoints(unittest.TestCase):
         user_id = response.get_json()['id']
 
         response = self.client.get(f'/api/v1/users/{user_id}')
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 200)
         self.assertIn('Roger', response.get_data(as_text=True))
 
     def test_get_user_not_found(self):
@@ -80,7 +80,7 @@ class TestUserEndpoints(unittest.TestCase):
             "last_name": "Name",
             "email": "updated@example.com"
         })
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 200)
         self.assertIn("Updated", response.get_data(as_text=True))
 
     def test_update_user_not_found(self):
