@@ -1,46 +1,28 @@
-import uuid
 from datetime import datetime
-from typing import Optional
+import uuid
+from app.models.base import BaseModel
 
 class Amenity(BaseModel):
     """
-    Représente une commodité (Amenity) dans le système.
-    
-    Attributs :
-        - id : identifiant unique (UUID en string)
-        - name : nom de la commodité
-        - created_at : date de création (datetime)
-        - updated_at : date de dernière modification (datetime)
+    Classe représentant une commodité (Amenity).
+
+    Hérite de BaseModel pour avoir un id unique et des timestamps.
     """
 
     def __init__(self, name: str):
+        super().__init__()
         if not name:
-            raise ValueError("Le nom de la commodité est obligatoire.")
-        self.id = str(uuid.uuid4())  # UUID stocké directement en string
+            raise ValueError("Le nom de la commodité est requis")
         self.name = name
-        self.created_at = datetime.now()
-        self.updated_at = datetime.now()
 
-    def save(self):
-        """Met à jour la date de modification (simulateur de sauvegarde)."""
-        self.updated_at = datetime.now()
-
-    @classmethod
-    def create(cls, name: str):
-        """Crée et retourne une nouvelle commodité."""
-        return cls(name)
-
-    def update(self, name: Optional[str] = None):
-        """Met à jour les attributs modifiables de la commodité."""
+    def update(self, name: str = None):
+        """Met à jour le nom de l'amenity."""
         if name:
             self.name = name
-            self.save()
+            self.updated_at = datetime.now()
 
-    def to_dict(self) -> dict:
-        """
-        Représente l'amenity sous forme de dictionnaire sérialisable en JSON.
-        (utile pour Flask-RESTx / Swagger)
-        """
+    def to_dict(self):
+        """Retourne une représentation dict sérialisable de l'amenity."""
         return {
             "id": self.id,
             "name": self.name,
