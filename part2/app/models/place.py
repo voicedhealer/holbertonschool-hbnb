@@ -80,3 +80,12 @@ class Place(BaseModel):
             amenity (Amenity): L'instance d'Amenity à ajouter à la liste.
         """
         self.amenities.append(amenity)
+    
+    def to_dict(self):
+        """Retourne un dictionnaire représentant le lieu."""
+        return {
+            'id': str(self.id),
+            'name': self.name,
+            'description': self.description,
+            # Ajoute ici tous les champs pertinents pour Place
+        }

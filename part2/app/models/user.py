@@ -2,7 +2,6 @@ from app.models.base import BaseModel
 from datetime import datetime
 import uuid
 
-
 class User(BaseModel):
     def __init__(self, first_name, last_name, email, password=None, is_admin=False):
         """
@@ -29,3 +28,16 @@ class User(BaseModel):
             if key not in protected_fields:
                 setattr(self, key, value)
         self.updated_at = datetime.now()
+
+    def to_dict(self):
+        """
+        Retourne une représentation dictionnaire de l'utilisateur,
+        sans le mot de passe ni les champs sensibles.
+        """
+        return {
+        "id": self.id,
+        "first_name": self.first_name,
+        "last_name": self.last_name,
+        "email": self.email
+            # Ajoute ici d'autres champs publics si besoin, mais jamais le mot de passe !
+        }

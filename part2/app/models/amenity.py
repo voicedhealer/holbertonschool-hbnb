@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Optional
 
-class Amenity:
+class Amenity(BaseModel):
     """
     Représente une commodité (Amenity) dans le système.
     

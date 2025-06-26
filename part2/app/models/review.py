@@ -43,3 +43,13 @@ class Review(BaseModel):
 
         self.date_submission = datetime.now()
         """La date de la review"""
+
+    def to_dict(self):
+        """Retourne un dictionnaire représentant l'avis."""
+        return {
+            'id': str(self.id),
+            'text': self.text,
+            'user_id': str(self.user_id),
+            'place_id': str(self.place_id),
+            # Ajoute ici tous les champs pertinents pour Review
+        }
