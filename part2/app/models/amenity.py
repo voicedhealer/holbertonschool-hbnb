@@ -3,7 +3,7 @@ from datetime import datetime
 from app.models.base import BaseModel
 from typing import Optional
 
-class Amenity:
+class Amenity(BaseModel):
     """
     Classe représentant une commodité (Amenity) selon le diagramme de classes.
     Attributs :
