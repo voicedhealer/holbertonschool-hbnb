@@ -1,3 +1,4 @@
+from app.models.base import BaseModel
 import uuid
 from datetime import datetime
 from typing import Optional
