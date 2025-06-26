@@ -1,26 +1,22 @@
 import uuid
 from datetime import datetime
-from app.models.base import BaseModel
 from typing import Optional
 
 class Amenity:
     """
-    Classe représentant une commodité (Amenity) selon le diagramme de classes.
+    Représente une commodité (Amenity) dans le système.
+    
     Attributs :
-        - id : UUID unique de l'amenity
+        - id : identifiant unique (UUID en string)
         - name : nom de la commodité
-        - created_at : date de création
-        - updated_at : date de dernière modification
-    Méthodes :
-        - save() : enregistre/modifie la commodité
-        - delete() : supprime la commodité
-        - create() : ajoute une nouvelle commodité
-        - update() : modifie la commodité
+        - created_at : date de création (datetime)
+        - updated_at : date de dernière modification (datetime)
     """
+
     def __init__(self, name: str):
-        if name is None:
-            raise ValueError("Le nom de la commodité ne peut pas être None")
-        self.id = uuid.uuid4()
+        if not name:
+            raise ValueError("Le nom de la commodité est obligatoire.")
+        self.id = str(uuid.uuid4())  # UUID stocké directement en string
         self.name = name
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
@@ -35,15 +31,18 @@ class Amenity:
         return cls(name)
 
     def update(self, name: Optional[str] = None):
-        """Modifie la commodité (ex : changer le nom)."""
+        """Met à jour les attributs modifiables de la commodité."""
         if name:
             self.name = name
             self.save()
 
-    def to_dict(self):
-        """Représente l'amenity sous forme de dictionnaire (utile pour l'API ou la sérialisation)."""
+    def to_dict(self) -> dict:
+        """
+        Représente l'amenity sous forme de dictionnaire sérialisable en JSON.
+        (utile pour Flask-RESTx / Swagger)
+        """
         return {
-            "id": str(self.id),
+            "id": self.id,
             "name": self.name,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat()
