@@ -21,16 +21,14 @@ class HBnBFacade:
         if not all(user_data.get(key) for key in ['first_name', 'last_name', 'email']):
             return {"message": "Missing required fields"}, 400
 
-        # Vérification de l'unicité de l'email
         if self.get_user_by_email(user_data['email']):
             return {"message": "Email already exists"}, 400
 
-        # Création de l'utilisateur
         user = User(**user_data)
         created_user = self.user_repo.create(user)
         user_dict = dict(created_user.__dict__)
         user_dict.pop('password', None)
-        return user_dict, 201
+        return user_dict
 
     def get_all_users(self) -> List[Dict[str, Any]]:
         users = self.user_repo.get_all()
