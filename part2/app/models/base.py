@@ -4,7 +4,7 @@ Module définissant la classe de base pour tous les modèles de données.
 import uuid
 from datetime import datetime
 from typing import Any
-from .base import BaseModel
+
 
 class BaseModel:
     """
