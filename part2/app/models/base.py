@@ -5,6 +5,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
+
 class BaseModel:
     """
     Classe de base abstraite pour tous les modèles de données de l'application.

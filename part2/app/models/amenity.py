@@ -1,3 +1,5 @@
+from app.models.base import BaseModel
+import uuid
 from datetime import datetime
 import uuid
 from app.models.base import BaseModel
