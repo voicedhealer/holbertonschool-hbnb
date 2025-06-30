@@ -1,5 +1,5 @@
 from .basemodel import BaseModel
-from . import db, bcrypt
+from .import db, bcrypt
 from flask_login import UserMixin
 import re
 
