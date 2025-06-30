@@ -1,5 +1,6 @@
 flask
 flask-restx
+flask-jwt-extended
+flask-bcrypt
 pip install -r requirements.txt
 python run.py
-flask-bcrypt
