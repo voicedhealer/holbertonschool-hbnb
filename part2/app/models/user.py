@@ -1,4 +1,5 @@
 from .basemodel import BaseModel
+from . import db
 import re
 
 class User(BaseModel):
@@ -81,3 +82,9 @@ class User(BaseModel):
             'last_name': self.last_name,
             'email': self.email
         }
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password = db.Column(db.String(120), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
