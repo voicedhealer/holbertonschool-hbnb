@@ -1,5 +1,6 @@
 from .basemodel import BaseModel
 from . import db
+from app.models import db
 import re
 
 class User(BaseModel):
