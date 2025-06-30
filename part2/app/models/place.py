@@ -87,5 +87,4 @@ class Place(BaseModel):
             'id': str(self.id),
             'name': self.name,
             'description': self.description,
-            # Ajoute ici tous les champs pertinents pour Place
         }
