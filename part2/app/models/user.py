@@ -1,43 +1,83 @@
-from app.models.base import BaseModel
-from datetime import datetime
-import uuid
+from .basemodel import BaseModel
+import re
 
 class User(BaseModel):
-    def __init__(self, first_name, last_name, email, password=None, is_admin=False):
-        """
-        Constructeur de la classe User.
-        Initialise un nouvel utilisateur avec prénom, nom, email et mot de passe.
-        Appelle le constructeur de BaseModel pour initialiser id, created_at, updated_at.
-        """
+    emails = set()
+
+    def __init__(self, first_name, last_name, email, is_admin=False):
         super().__init__()
-        self.id = str(uuid.uuid4())
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
-        self.password = password  # Mot de passe de l'utilisateur (à remplacer par un hash sécurisé en prod)
         self.is_admin = is_admin
+        self.places = []
+        self.reviews = []
+    
+    @property
+    def first_name(self):
+        return self.__first_name
+    
+    @first_name.setter
+    def first_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError("First name must be a string")
+        super().is_max_length('First name', value, 50)
+        self.__first_name = value
 
-    def update(self, **kwargs):
-        """
-        Met à jour les attributs de l'utilisateur avec les valeurs fournies dans kwargs.
-        Met également à jour la date de modification (updated_at).
-        Ne permet pas de modifier 'id', 'created_at', ou 'updated_at'.
-        """
-        protected_fields = {'id', 'created_at', 'updated_at'}
-        for key, value in kwargs.items():
-            if key not in protected_fields:
-                setattr(self, key, value)
-        self.updated_at = datetime.now()
+    @property
+    def last_name(self):
+        return self.__last_name
+
+    @last_name.setter
+    def last_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError("Last name must be a string")
+        super().is_max_length('Last name', value, 50)
+        self.__last_name = value
+
+    @property
+    def email(self):
+        return self.__email
+
+    @email.setter
+    def email(self, value):
+        if not isinstance(value, str):
+            raise TypeError("Email must be a string")
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", value):
+            raise ValueError("Invalid email format")
+        if value in User.emails:
+            raise ValueError("Email already exists")
+        if hasattr(self, "_User__email"):
+            User.emails.discard(self.__email)
+        self.__email = value
+        User.emails.add(value)
+
+    @property
+    def is_admin(self):
+        return self.__is_admin
+    
+    @is_admin.setter
+    def is_admin(self, value):
+        if not isinstance(value, bool):
+            raise TypeError("Is Admin must be a boolean")
+        self.__is_admin = value
+
+    def add_place(self, place):
+        """Add an amenity to the place."""
+        self.places.append(place)
+
+    def add_review(self, review):
+        """Add an amenity to the place."""
+        self.reviews.append(review)
+
+    def delete_review(self, review):
+        """Add an amenity to the place."""
+        self.reviews.remove(review)
 
     def to_dict(self):
-        """
-        Retourne une représentation dictionnaire de l'utilisateur,
-        sans le mot de passe ni les champs sensibles.
-        """
         return {
-        "id": self.id,
-        "first_name": self.first_name,
-        "last_name": self.last_name,
-        "email": self.email
-            # Ajoute ici d'autres champs publics si besoin, mais jamais le mot de passe !
+            'id': self.id,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'email': self.email
         }

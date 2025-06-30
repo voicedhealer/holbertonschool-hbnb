@@ -1,108 +1,119 @@
-"""
-Module gérant les endpoints de l'API pour les ressources 'Place'.
-
-Ce fichier définit les routes et les opérations CRUD (Create, Read, Update)
-pour les lieux (Places). Il utilise Flask-RESTX pour structurer l'API,
-valider les données entrantes et formater les réponses.
-"""
-from flask import request
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
 
-# Création du namespace pour les opérations sur les lieux.
-# 'places' sera le préfixe de l'URL (ex: /api/places).
-place_ns = Namespace('places', description='Opérations relatives aux lieux')
+api = Namespace('places', description='Place operations')
 
-# Modèle de données utilisé pour la validation des requêtes et la
-# documentation automatique de l'API (Swagger UI).
-place_model = place_ns.model('Place', {
-    'title': fields.String(required=True, description='Le titre ou nom du lieu.'),
-    'description': fields.String(description='Une description détaillée du lieu.'),
-    'price': fields.Float(required=True, description='Le prix par nuit.'),
-    'latitude': fields.Float(required=True, description='La latitude géographique du lieu.'),
-    'longitude': fields.Float(required=True, description='La longitude géographique du lieu.'),
-    'owner_id': fields.String(required=True, description="L'identifiant du propriétaire (User)."),
-    'city': fields.String(description='La ville où se situe le lieu.'),
-    'address': fields.String(description="L'adresse complète du lieu."),
-    'amenities': fields.List(fields.String, description="Liste des identifiants des 'amenities' associées.")
+# Define the models for related entities
+amenity_model = api.model('PlaceAmenity', {
+    'id': fields.String(description='Amenity ID'),
+    'name': fields.String(description='Name of the amenity')
 })
 
+user_model = api.model('PlaceUser', {
+    'id': fields.String(description='User ID'),
+    'first_name': fields.String(description='First name of the owner'),
+    'last_name': fields.String(description='Last name of the owner'),
+    'email': fields.String(description='Email of the owner')
+})
 
-@place_ns.route('/')
+# Define the place model for input validation and documentation
+place_model = api.model('Place', {
+    'title': fields.String(required=True, description='Title of the place'),
+    'description': fields.String(description='Description of the place'),
+    'price': fields.Float(required=True, description='Price per night'),
+    'latitude': fields.Float(required=True, description='Latitude of the place'),
+    'longitude': fields.Float(required=True, description='Longitude of the place'),
+    'owner_id': fields.String(required=True, description='ID of the owner'),
+    'owner': fields.Nested(user_model, description='Owner details'),
+    'amenities': fields.List(fields.String, required=True, description="List of amenities ID's")
+})
+
+@api.route('/')
 class PlaceList(Resource):
-    """Gère les opérations sur la collection de lieux (création et listage)."""
-
-    @place_ns.doc('create_place')
-    @place_ns.expect(place_model, validate=True)
-    @place_ns.response(201, 'Lieu créé avec succès.')
+    @api.expect(place_model)
+    @api.response(201, 'Place successfully created')
+    @api.response(400, 'Invalid input data')
     def post(self):
-        """
-        Crée un nouveau lieu.
+        """Register a new place"""
+        place_data = api.payload
+        owner = place_data.get('owner_id', None)
 
-        Le corps de la requête doit contenir un objet JSON conforme au `place_model`.
-        La validation des données est gérée automatiquement par Flask-RESTX.
-        En cas de succès, retourne les données du lieu nouvellement créé avec un
-        code de statut HTTP 201.
-        """
-        data = request.json
-        place = facade.create_place(data)
-        return place, 201
+        if owner is None or len(owner) == 0:
+            return {'error': 'Invalid input data.'}, 400
 
-    @place_ns.doc('list_places')
-    @place_ns.response(200, 'Liste des lieux récupérée avec succès.')
+        user = facade.user_repo.get_by_attribute('id', owner)
+        if not user:
+            return {'error': 'Invalid input data'}, 400
+        try:
+            new_place = facade.create_place(place_data)
+            return new_place.to_dict(), 201
+        except Exception as e:
+            return {'error': str(e)}, 400
+
+    @api.response(200, 'List of places retrieved successfully')
     def get(self):
-        """
-        Récupère et retourne la liste de tous les lieux.
+        """Retrieve a list of all places"""
+        places = facade.get_all_places()
+        return [place.to_dict() for place in places], 200
 
-        Cette route ne nécessite aucun paramètre et renvoie un tableau
-        contenant tous les lieux enregistrés dans la base de données.
-        """
-        return facade.get_all_places(), 200
-
-
-@place_ns.route('/<string:place_id>')
-@place_ns.param('place_id', 'L\'identifiant unique du lieu.')
-@place_ns.response(404, 'Lieu non trouvé.')
+@api.route('/<place_id>')
 class PlaceResource(Resource):
-    """Gère les opérations sur un lieu spécifique, identifié par son ID."""
-
-    @place_ns.doc('get_place')
-    @place_ns.response(200, 'Lieu trouvé avec succès.')
+    @api.response(200, 'Place details retrieved successfully')
+    @api.response(404, 'Place not found')
     def get(self, place_id):
-        """
-        Récupère les informations d'un lieu spécifique par son ID.
-
-        Args:
-            place_id (str): L'identifiant du lieu à récupérer, passé dans l'URL.
-
-        Returns:
-            dict: Un dictionnaire contenant les détails du lieu.
-                  Retourne une erreur 404 si aucun lieu ne correspond à l'ID.
-        """
+        """Get place details by ID"""
         place = facade.get_place(place_id)
         if not place:
-            place_ns.abort(404, f'Lieu avec l\'ID {place_id} non trouvé.')
-        return place, 200
+            return {'error': 'Place not found'}, 404
+        return place.to_dict_list(), 200
 
-    @place_ns.doc('update_place')
-    @place_ns.expect(place_model, validate=True)
-    @place_ns.response(200, 'Lieu mis à jour avec succès.')
+    @api.expect(place_model)
+    @api.response(200, 'Place updated successfully')
+    @api.response(404, 'Place not found')
+    @api.response(400, 'Invalid input data')
     def put(self, place_id):
-        """
-        Met à jour les informations d'un lieu existant.
+        """Update a place's information"""
+        place_data = api.payload
+        place = facade.get_place(place_id)
+        if not place:
+            return {'error': 'Place not found'}, 404
+        try:
+            facade.update_place(place_id, place_data)
+            return {'message': 'Place updated successfully'}, 200
+        except Exception as e:
+            return {'error': str(e)}, 400
 
-        Le corps de la requête doit contenir un objet JSON avec les champs
-        à mettre à jour, conformément au `place_model`.
+@api.route('/<place_id>/amenities')
+class PlaceAmenities(Resource):
+    @api.expect(amenity_model)
+    @api.response(200, 'Amenities added successfully')
+    @api.response(404, 'Place not found')
+    @api.response(400, 'Invalid input data')
+    def post(self, place_id):
+        amenities_data = api.payload
+        if not amenities_data or len(amenities_data) == 0:
+            return {'error': 'Invalid input data'}, 400
+        
+        place = facade.get_place(place_id)
+        if not place:
+            return {'error': 'Place not found'}, 404
+        
+        for amenity in amenities_data:
+            a = facade.get_amenity(amenity['id'])
+            if not a:
+                return {'error': 'Invalid input data'}, 400
+        
+        for amenity in amenities_data:
+            place.add_amenity(amenity)
+        return {'message': 'Amenities added successfully'}, 200
 
-        Args:
-            place_id (str): L'identifiant du lieu à mettre à jour.
-
-        Returns:
-            dict: Les données du lieu mis à jour.
-                  Retourne une erreur 404 si aucun lieu ne correspond à l'ID.
-        """
-        data = request.json
-        updated = facade.update_place(place_id, data)
-        if not updated:
-            place_ns.abort(404, f'Lieu avec l\'ID {place_id} non trouvé.')
-        return updated, 200
+@api.route('/<place_id>/reviews/')
+class PlaceReviewList(Resource):
+    @api.response(200, 'List of reviews for the place retrieved successfully')
+    @api.response(404, 'Place not found')
+    def get(self, place_id):
+        """Get all reviews for a specific place"""
+        place = facade.get_place(place_id)
+        if not place:
+            return {'error': 'Place not found'}, 404
+        return [review.to_dict() for review in place.reviews], 200
