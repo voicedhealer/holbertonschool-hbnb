@@ -94,33 +94,23 @@ class AppUser(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False, index=True)
     
     # 1. On renomme la colonne
-    password_hash = db.Column(db.String(128), nullable=False)
+    password = db.Column(db.String(128), nullable=False)
     
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
 
-    @property
-    def password(self):
+    def hash_password(self, password_to_hash):
         """
-        Empêche la lecture directe du mot de passe haché.
-        Accéder à `user.password` lèvera une erreur. C'est une sécurité.
+        Hashes the password before storing it.
         """
-        raise AttributeError('password is not a readable attribute')
+        # L'énoncé stocke le résultat dans self.password
+        self.password = bcrypt.generate_password_hash(password_to_hash).decode('utf-8')
 
-    @password.setter
-    def password(self, password_to_hash):
+    def verify_password(self, password_to_check):
         """
-        Définit le mot de passe en le hachant automatiquement.
-        Permet de faire : user.password = 'mon_super_mot_de_passe'
+        Verifies if the provided password matches the hashed password.
         """
-        # Bcrypt génère un hash binaire, on le décode en UTF-8 pour le stockage.
-        self.password_hash = bcrypt.generate_password_hash(password_to_hash).decode('utf-8')
-
-    def check_password(self, password_to_check):
-        """
-        Vérifie si un mot de passe fourni correspond au hash stocké.
-        Retourne True ou False.
-        """
-        return bcrypt.check_password_hash(self.password_hash, password_to_check)
+        # L'énoncé compare avec self.password
+        return bcrypt.check_password_hash(self.password, password_to_check)
 
     def __repr__(self):
         """
