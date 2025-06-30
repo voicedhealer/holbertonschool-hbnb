@@ -24,8 +24,4 @@ def create_app(config_class="app.config.DevelopmentConfig"):
     api.add_namespace(places_ns, path='/api/v1/places')
     api.add_namespace(reviews_ns, path='/api/v1/reviews')
 
-    # Si tu as des blueprints classiques, tu peux les enregistrer ici
-    # from .routes import bp as main_bp
-    # app.register_blueprint(main_bp)
-
     return app
