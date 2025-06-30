@@ -39,6 +39,7 @@ holbertonschool-hbnb/
         │   │   ├── place.py                # Place model
         │   │   ├── review.py               # Review model
         │   │   ├── amenity.py              # Amenity model (comfort)
+        │   │   ├── basemodel.py            # 
         │   ├── services/                   # Business logic, services, and models
         │   │   ├── __init__.py             # Initializes the services package
         │   │   ├── facade.py               # Facade model to centralize business logic
