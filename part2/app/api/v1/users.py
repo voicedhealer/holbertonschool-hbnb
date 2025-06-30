@@ -4,8 +4,7 @@ from flask_jwt_extended import create_access_token
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from flask import abort
 from app.services import facade
-from app.models import db
-from app.models import User
+from app.models.user import User
 
 api = Namespace('users', description='User operations')
 
