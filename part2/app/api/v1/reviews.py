@@ -1,107 +1,81 @@
-"""
-Module pour la gestion des endpoints de l'API concernant les 'Reviews'.
-
-Ce fichier définit les routes et les opérations CRUD (Create, Read, Update, Delete)
-pour les ressources 'Review'. Il s'appuie sur Flask-RESTX pour structurer
-les endpoints, valider les données et générer la documentation Swagger.
-"""
-from flask import request
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
 
-# Création du namespace pour regrouper toutes les routes liées aux reviews.
-review_ns = Namespace("reviews", description="Opérations relatives aux reviews (avis)")
+api = Namespace('reviews', description='Review operations')
 
-# Définition du modèle de données pour une review.
-# Ce modèle sert à la fois à la validation des données entrantes (payloads)
-# et à la documentation automatique de l'API.
-review_model = review_ns.model('Review', {
-    'id': fields.String(readonly=True, description="L'identifiant unique de la review"),
-    'user_id': fields.String(required=True, description="L'identifiant de l'utilisateur qui a posté la review"),
-    'place_id': fields.String(required=True, description="L'identifiant du lieu concerné par la review"),
-    'text': fields.String(required=True, description="Le contenu textuel de la review"),
-    'rating': fields.Integer(required=True, description="La note attribuée par l'utilisateur, de 1 à 5"),
-    'comment': fields.String(description="Un commentaire additionnel et optionnel")
+# Define the review model for input validation and documentation
+review_model = api.model('Review', {
+    'text': fields.String(required=True, description='Text of the review'),
+    'rating': fields.Integer(required=True, description='Rating of the place (1-5)'),
+    'user_id': fields.String(required=True, description='ID of the user'),
+    'place_id': fields.String(required=True, description='ID of the place')
 })
 
-
-@review_ns.route('/')
+@api.route('/')
 class ReviewList(Resource):
-    """Gère les opérations sur la liste des reviews."""
-
-    @review_ns.doc('list_reviews')
-    @review_ns.marshal_list_with(review_model)
-    def get(self):
-        """
-        Récupère la liste complète de toutes les reviews.
-
-        Retourne un tableau de toutes les reviews présentes dans le système,
-        chacune formatée selon le `review_model`.
-        """
-        return facade.get_all_reviews()
-
-    @review_ns.doc('create_review')
-    @review_ns.expect(review_model, validate=True)
-    @review_ns.marshal_with(review_model, code=201)
+    @api.expect(review_model)
+    @api.response(201, 'Review successfully created')
+    @api.response(400, 'Invalid input data')
     def post(self):
-        """
-        Crée une nouvelle review.
+        """Register a new review"""
+        review_data = api.payload
+        place = facade.get_place(review_data['place_id'])
+        if not place:
+            return {'error': 'Place not found'}, 400
+        user = facade.get_user(review_data['user_id'])
+        if not user:
+            return {'error': 'User not found'}, 400
+        if place.owner.id == user.id:
+            return {'error': 'User cannot review their own place'}, 400
+        try:
+            new_review = facade.create_review(review_data)
+            return new_review.to_dict(), 201
+        except Exception as e:
+            return {'error': str(e)}, 400
 
-        Le corps de la requête doit être un objet JSON qui correspond au `review_model`
-        (sans l'ID, qui est généré automatiquement). La validation des champs
-        requis, des types de données, est automatique.
+    @api.response(200, 'List of reviews retrieved successfully')
+    def get(self):
+        """Retrieve a list of all reviews"""
+        return [review.to_dict() for review in facade.get_all_reviews()], 200
 
-        Returns:
-            tuple: Un tuple contenant la review nouvellement créée et le code
-                   de statut HTTP 201 (Created).
-        """
-        data = request.json
-        return facade.create_review(data), 201
-
-
-@review_ns.route('/<string:review_id>')
-@review_ns.param('review_id', "L'identifiant unique de la review")
-@review_ns.response(404, 'Review non trouvée.')
+@api.route('/<review_id>')
 class ReviewResource(Resource):
-    """Gère les opérations sur une review spécifique (GET, PUT, DELETE)."""
-
-    @review_ns.doc('get_review')
-    @review_ns.marshal_with(review_model)
+    @api.response(200, 'Review details retrieved successfully')
+    @api.response(404, 'Review not found')
     def get(self, review_id):
-        """
-        Récupère les détails d'une review spécifique par son ID.
-
-        Args:
-            review_id (str): L'identifiant de la review à récupérer.
-
-        Returns:
-            dict: L'objet de la review si elle est trouvée.
-                  Provoque une erreur 404 si l'ID n'existe pas.
-        """
+        """Get review details by ID"""
         review = facade.get_review(review_id)
         if not review:
-            review_ns.abort(404, f"Review avec l'ID {review_id} non trouvée.")
-        return review
+            return {'error': 'Review not found'}, 404
+        return review.to_dict(), 200
 
-    @review_ns.doc('update_review')
-    @review_ns.expect(review_model, validate=True)
-    @review_ns.marshal_with(review_model)
+    @api.expect(review_model)
+    @api.response(200, 'Review updated successfully')
+    @api.response(404, 'Review not found')
+    @api.response(400, 'Invalid input data')
     def put(self, review_id):
-        """
-        Met à jour une review existante.
-
-        Le corps de la requête contient les nouvelles données pour la review.
-        Seuls les champs fournis dans le JSON seront mis à jour.
-
-        Args:
-            review_id (str): L'identifiant de la review à mettre à jour.
-
-        Returns:
-            dict: L'objet de la review après mise à jour.
-                  Provoque une erreur 404 si l'ID n'existe pas.
-        """
-        data = request.json
-        review = facade.update_review(review_id, data)
+        """Update a review's information"""
+        review_data = api.payload
+        review = facade.get_review(review_id)
         if not review:
-            review_ns.abort(404, f"Review avec l'ID {review_id} non trouvée.")
-        return review
+            return {'error': 'Review not found'}, 404
+        
+        try:
+            facade.update_review(review_id, review_data)
+            return {'message': 'Review updated successfully'}, 200
+        except Exception as e:
+            return {'error': str(e)}, 400
+
+    @api.response(200, 'Review deleted successfully')
+    @api.response(404, 'Review not found')
+    def delete(self, review_id):
+        """Delete a review"""
+        review = facade.get_review(review_id)
+        if not review:
+            return {'error': 'Review not found'}, 404
+        
+        try:
+            facade.delete_review(review_id)
+            return {'message': 'Review deleted successfully'}, 200
+        except Exception as e:
+            return {'error': str(e)}, 400
