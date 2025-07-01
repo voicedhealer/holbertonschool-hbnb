@@ -1,5 +1,6 @@
 from .basemodel import BaseModel
-from . import db
+from . import db, bcrypt
+from flask_login import UserMixin
 import re
 
 class User(BaseModel):
@@ -83,8 +84,36 @@ class User(BaseModel):
             'email': self.email
         }
 
-class User(db.Model):
+class AppUser(UserMixin, db.Model):
+    """
+    Modèle utilisateur sécurisé avec hachage de mot de passe.
+    """
+    __tablename__ = 'app_users'
+
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    password = db.Column(db.String(120), nullable=False)
-    is_admin = db.Column(db.Boolean, default=False)
+    username = db.Column(db.String(80), unique=True, nullable=False, index=True)
+    
+    # 1. On renomme la colonne
+    password = db.Column(db.String(128), nullable=False)
+    
+    is_admin = db.Column(db.Boolean, default=False, nullable=False)
+
+    def hash_password(self, password_to_hash):
+        """
+        Hashes the password before storing it.
+        """
+        # L'énoncé stocke le résultat dans self.password
+        self.password = bcrypt.generate_password_hash(password_to_hash).decode('utf-8')
+
+    def verify_password(self, password_to_check):
+        """
+        Verifies if the provided password matches the hashed password.
+        """
+        # L'énoncé compare avec self.password
+        return bcrypt.check_password_hash(self.password, password_to_check)
+
+    def __repr__(self):
+        """
+        Représentation utile pour le débogage.
+        """
+        return f'<AppUser {self.username}>'

@@ -1,11 +1,15 @@
 from flask import Flask
 from flask_restx import Api
 from flask_jwt_extended import JWTManager
-from .models import db
+from flask_bcrypt import Bcrypt
+from app.models import db
 from app.api.v1.users import api as users_ns
 from app.api.v1.amenities import api as amenities_ns
 from app.api.v1.places import api as places_ns
 from app.api.v1.reviews import api as reviews_ns
+
+bcrypt = Bcrypt()
+jwt = JWTManager()
 
 def create_app(config_class="app.config.DevelopmentConfig"):
     app = Flask(__name__)
@@ -14,7 +18,8 @@ def create_app(config_class="app.config.DevelopmentConfig"):
     # Initialisation des extensions
     db.init_app(app)
     jwt = JWTManager(app)
-
+    jwt.init_app(app)
+    
     # Initialisation de l'API RESTX
     api = Api(app, version='1.0', title='HBnB API', description='HBnB Application API')
 

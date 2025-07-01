@@ -1,7 +1,17 @@
 from flask_restx import Namespace, Resource, fields
+from flask import request
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+from flask import abort
 from app.services import facade
+from app.models.user import User
 
 api = Namespace('users', description='User operations')
+
+login_model = api.model('Login', {
+    'username': fields.String(required=True),
+    'password': fields.String(required=True)
+})
 
 # Define the user model for input validation and documentation
 user_model = api.model('User', {
@@ -10,7 +20,41 @@ user_model = api.model('User', {
     'email': fields.String(required=True, description='Email of the user')
 })
 
-@api.route('/')
+@api.route('/admin')  # Bonus, endpoint réservé aux admins
+class AdminOnly(Resource):
+    @jwt_required()
+    def get(self):
+        claims = get_jwt()
+        if not claims.get("is_admin", False):
+            abort(403, "Accès réservé aux administrateurs")
+        return {"msg": "Bienvenue, admin !"}
+
+@api.route('/me')  # Endpoint pour récupérer et protéger les informations de l'utilisateur connecté
+class Me(Resource):
+    @jwt_required()
+    def get(self):
+        user_id = get_jwt_identity()
+        claims = get_jwt()  # Pour récupérer les claims (ex: is_admin)
+        user = User.query.get(user_id)
+        return {
+            "username": user.username,
+            "is_admin": claims.get("is_admin", False)
+        }
+
+@api.route('/login')  # Endpoint pour la connexion des utilisateurs
+class Login(Resource):
+    @api.expect(login_model)
+    def post(self):
+        data = request.json
+        user = User.query.filter_by(username=data['username']).first()
+        if user and user.password == data['password']:
+            # Tu peux ajouter des claims personnalisés ici (ex: is_admin)
+            additional_claims = {"is_admin": user.is_admin}
+            token = create_access_token(identity=user.id, additional_claims=additional_claims)
+            return {"access_token": token}, 200
+        return {"msg": "Mauvais identifiants"}, 401
+
+@api.route('/')  # Endpoint pour la création et la récupération des utilisateurs
 class UserList(Resource):
     @api.expect(user_model, validate=True)
     @api.response(201, 'User successfully created')
@@ -37,7 +81,7 @@ class UserList(Resource):
         users = facade.get_users()
         return [user.to_dict() for user in users], 200
     
-@api.route('/<user_id>')
+@api.route('/<user_id>')  # Endpoint pour récupérer et mettre à jour un utilisateur par ID
 class UserResource(Resource):
     @api.response(200, 'User details retrieved successfully')
     @api.response(404, 'User not found')
