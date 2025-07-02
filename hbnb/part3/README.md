@@ -28,45 +28,37 @@ Troisième partie du projet ""HBnB"", application web inspirée d'Airbnb. Cette 
 ---
 
 ## 🗃️ Structure du Projet
-
-part3/
-├── api/
-│   └── v1/
-│       ├── __init__.py
-│       ├── auth.py
-│       ├── users.py
-│       ├── places.py
-│       ├── reviews.py
-│       ├── amenities.py
-│       └── admin.py
-│
-├── app/
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── base_model.py
-│   │   ├── user.py
-│   │   ├── place.py
-│   │   ├── review.py
-│   │   ├── amenity.py
-│   │   └── place_amenity.py
-│   │
-│   ├── services/
-│   │   ├── __init__.py
-│   │   └── facade.py
-│   │
-│   ├── persistence/
-│   │   ├── __init__.py
-│   │   ├── repository.py
-│   │   ├── sqlalchemy_repo.py
-│   │   └── user_repository.py
-│   │
-│   ├── __init__.py
-│
-├── config.py
-├── run.py
-├── requirements.txt
-├── erDiagram.mmd
-└── README.md
+holbertonschool-hbnb/
+└── hbnb/
+    ├── app/
+    │   ├── __init__.py
+    │   ├── api/
+    │   │   ├── __init__.py
+    │   │   ├── v1/
+    │   │       ├── __init__.py
+    │   │       ├── users.py
+    │   │       ├── places.py
+    │   │       ├── reviews.py
+    │   │       ├── amenities.py
+    │   │       │── auth.py
+    │   ├── models/
+    │   │   ├── __init__.py
+    │   │   │── basemodel.py
+    │   │   ├── user.py
+    │   │   ├── place.py
+    │   │   ├── review.py
+    │   │   ├── amenity.py
+    │   ├── services/
+    │   │   ├── __init__.py
+    │   │   ├── facade.py
+    │   ├── persistence/
+    │       ├── __init__.py
+    │       ├── repository.py
+    ├── run.py
+    ├── config.py
+    ├── requirements.txt
+    ├── README.md
+    └── erDiagram.mmd
 
 ## ⚙️ Technologies Utilisées
 
