@@ -20,7 +20,7 @@ def test_post():
 
 if __name__ == "__main__":
     # Ouvre Swagger UI automatiquement
-    webbrowser.open("http://localhost:5001/api/v1/")
+    webbrowser.open("http://localhost:5001")
     
     print(app.url_map)
     # Lance le serveur sur le port 5001
