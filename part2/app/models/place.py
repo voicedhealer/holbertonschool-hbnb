@@ -88,6 +88,8 @@ class Place(BaseModel):
             'id': self.id,
             'title': self.title,
             'description': self.description,
+<<<<<<< HEAD
+=======
             'price': self.price,
             'latitude': self.latitude,
             'longitude': self.longitude,
@@ -105,4 +107,5 @@ class Place(BaseModel):
             'owner': self.owner.to_dict(),
             'amenities': self.amenities,
             'reviews': self.reviews
+>>>>>>> e3aae9bdad1665e905a72014d83d2429b964e26c
         }
