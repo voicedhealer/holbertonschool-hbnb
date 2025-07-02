@@ -1,12 +1,14 @@
 from typing import List, Optional, TYPE_CHECKING
 from app.models.basemodel import BaseModel
 from app.persistence.repository import Repository
+from app.persistence.repository import InMemoryRepository
 
 # Pour éviter les importations circulaires tout en gardant le type hinting
 if TYPE_CHECKING:
     from app.models.user import User
     from app.models.review import Review
     from app.models.amenity import Amenity
+    from app.models.place import Place
 
 class Place(BaseModel):
     """
@@ -68,12 +70,6 @@ class Place(BaseModel):
             'amenities': [a.id for a in self.amenities] if self.amenities else [],
         }
 
-from app.persistence.repository import InMemoryRepository
-
-from app.models.user import User
-from app.models.amenity import Amenity
-from app.models.place import Place
-from app.models.review import Review
 
 class HBnBFacade:
     def __init__(self):
