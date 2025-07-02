@@ -1,14 +1,11 @@
-from typing import List, Optional, TYPE_CHECKING
+from typing import List, Optional
 from app.models.basemodel import BaseModel
 from app.persistence.repository import Repository
 from app.persistence.repository import InMemoryRepository
-
-# Pour éviter les importations circulaires tout en gardant le type hinting
-if TYPE_CHECKING:
-    from app.models.user import User
-    from app.models.review import Review
-    from app.models.amenity import Amenity
-    from app.models.place import Place
+from app.models.user import User
+from app.models.review import Review
+from app.models.amenity import Amenity
+from app.models.place import Place
 
 class Place(BaseModel):
     """
@@ -113,23 +110,17 @@ class HBnBFacade:
 
     # PLACE
     def create_place(self, place_data):
-        user = self.user_repo.get_by_attribute('id', place_data['owner_id'])
+        user = self.user_repo.get(place_data['owner_id'])
         if not user:
             raise KeyError('Invalid input data')
-        del place_data['owner_id']
-        place_data['owner'] = user
+
         amenities = place_data.pop('amenities', None)
-        if amenities:
-            for a in amenities:
-                amenity = self.get_amenity(a['id'])
-                if not amenity:
-                    raise KeyError('Invalid input data')
         place = Place(**place_data)
         self.place_repo.add(place)
         user.add_place(place)
         if amenities:
             for amenity in amenities:
-                place.add_amenity(amenity)
+                place.add_amenity(self.get_amenity(amenity['id']))
         return place
 
     def get_place(self, place_id):
