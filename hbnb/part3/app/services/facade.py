@@ -1,5 +1,5 @@
 from typing import List, Optional, TYPE_CHECKING
-from app.models.base import BaseModel
+from app.models.basemodel import BaseModel
 from app.persistence.repository import Repository
 
 # Pour éviter les importations circulaires tout en gardant le type hinting
