@@ -1,5 +1,5 @@
 from typing import List, Optional, TYPE_CHECKING
-from app.models.base import BaseModel
+from app.models.basemodel import BaseModel
 from app.persistence.repository import Repository
 
 # Pour éviter les importations circulaires tout en gardant le type hinting
@@ -77,10 +77,10 @@ from app.models.review import Review
 
 class HBnBFacade:
     def __init__(self):
-        self.user_repo = InMemoryRepository(User)
-        self.amenity_repo = InMemoryRepository(Amenity)
-        self.place_repo = InMemoryRepository(Place)
-        self.review_repo = InMemoryRepository(Review)
+        self.amenity_repo = InMemoryRepository()
+        self.amenity_repo = InMemoryRepository()
+        self.place_repo = InMemoryRepository()
+        self.review_repo = InMemoryRepository()
 
     def create_user(self, user_data):
         password = user_data.pop('password')
