@@ -21,7 +21,6 @@ class BaseModel:
     def is_max_length(self, name, value, max_length):
         if len(value) > max_length:
             raise ValueError(f"{name} must be {max_length} characters max.") 
-        
     
     def is_between(self, name, value, min, max):
         if not min < value < max:
