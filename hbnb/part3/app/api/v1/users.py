@@ -18,6 +18,7 @@ user_model = api.model('User', {
     'first_name': fields.String(required=True, description='First name of the user'),
     'last_name': fields.String(required=True, description='Last name of the user'),
     'email': fields.String(required=True, description='Email of the user'),
+    'password': fields.String(required=True, description='Password of the user'),
     'is_admin': fields.Boolean(required=False, description='Is the user admin', default=False)  # création d’un user admin via l’API
 })
 
