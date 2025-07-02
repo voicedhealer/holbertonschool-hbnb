@@ -77,10 +77,10 @@ from app.models.review import Review
 
 class HBnBFacade:
     def __init__(self):
-        self.user_repo = InMemoryRepository(User)
-        self.amenity_repo = InMemoryRepository(Amenity)
-        self.place_repo = InMemoryRepository(Place)
-        self.review_repo = InMemoryRepository(Review)
+        self.amenity_repo = InMemoryRepository()
+        self.amenity_repo = InMemoryRepository()
+        self.place_repo = InMemoryRepository()
+        self.review_repo = InMemoryRepository()
 
     def create_user(self, user_data):
         password = user_data.pop('password')
