@@ -1,9 +1,9 @@
 from .basemodel import BaseModel
-from . import db, bcrypt
+from app import db, bcrypt
 from flask_login import UserMixin
 import re
 
-class User(BaseModel):
+class User(UserMixin, db.Model):
     emails = set()
 
     def __init__(self, first_name, last_name, email, is_admin=False):
@@ -84,10 +84,6 @@ class User(BaseModel):
             'email': self.email
         }
 
-class AppUser(UserMixin, db.Model):
-    """
-    Modèle utilisateur sécurisé avec hachage de mot de passe.
-    """
     __tablename__ = 'app_users'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -116,4 +112,4 @@ class AppUser(UserMixin, db.Model):
         """
         Représentation utile pour le débogage.
         """
-        return f'<AppUser {self.username}>'
+        return f'<User {self.username}>'

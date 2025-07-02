@@ -1,7 +1,6 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
 
-
 api = Namespace('amenities', description='Amenity operations')
 
 # Define the amenity model for input validation and documentation
@@ -32,7 +31,6 @@ class AmenityList(Resource):
         """Retrieve a list of all amenities"""
         amenities = facade.get_all_amenities()
         return [amenity.to_dict() for amenity in amenities], 200
-
 
 @api.route('/<amenity_id>')
 class AmenityResource(Resource):

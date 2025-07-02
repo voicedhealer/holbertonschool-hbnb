@@ -1,5 +1,6 @@
 from .basemodel import BaseModel
 from .user import User
+from app import db
 
 class Place(BaseModel):
     def __init__(self, title: str, price: float, latitude: str, longitude, owner, description=None):

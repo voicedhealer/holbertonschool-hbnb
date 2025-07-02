@@ -22,8 +22,13 @@ user_model = api.model('User', {
 
 @api.route('/admin')  # Bonus, endpoint réservé aux admins
 class AdminOnly(Resource):
+    @api.doc(security='jwt')
     @jwt_required()
     def get(self):
+        """
+        Endpoint protégé accessible uniquement
+        aux administrateurs avec un token valide.
+        """
         claims = get_jwt()
         if not claims.get("is_admin", False):
             abort(403, "Accès réservé aux administrateurs")
@@ -47,8 +52,7 @@ class Login(Resource):
     def post(self):
         data = request.json
         user = User.query.filter_by(username=data['username']).first()
-        if user and user.password == data['password']:
-            # Tu peux ajouter des claims personnalisés ici (ex: is_admin)
+        if user and user.verify_password(data['password']):
             additional_claims = {"is_admin": user.is_admin}
             token = create_access_token(identity=user.id, additional_claims=additional_claims)
             return {"access_token": token}, 200
