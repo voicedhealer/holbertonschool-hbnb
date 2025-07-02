@@ -13,11 +13,12 @@ login_model = api.model('Login', {
     'password': fields.String(required=True)
 })
 
-# Define the user model for input validation and documentation
+# Défini le modèle utilisateur pour la validation et la documentation des entrées
 user_model = api.model('User', {
     'first_name': fields.String(required=True, description='First name of the user'),
     'last_name': fields.String(required=True, description='Last name of the user'),
-    'email': fields.String(required=True, description='Email of the user')
+    'email': fields.String(required=True, description='Email of the user'),
+    'is_admin': fields.Boolean(required=False, description='Is the user admin', default=False)  # création d’un user admin via l’API
 })
 
 @api.route('/admin')  # Bonus, endpoint réservé aux admins
