@@ -1,5 +1,3 @@
-from app.persistence.repository import SQLAlchemyRepository 
-
 from typing import List, Optional, TYPE_CHECKING
 from app.models.base import BaseModel
 from app.persistence.repository import Repository
