@@ -70,6 +70,13 @@ class Place(BaseModel):
             'amenities': [a.id for a in self.amenities] if self.amenities else [],
         }
 
+<<<<<<< HEAD
+=======
+from app.models.user import User
+from app.models.amenity import Amenity
+from app.models.place import Place
+from app.models.review import Review
+>>>>>>> bb020fb (WIP: modifications locales sur facade.py)
 
 class HBnBFacade:
     def __init__(self):
