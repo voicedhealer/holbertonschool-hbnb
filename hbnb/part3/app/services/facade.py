@@ -192,4 +192,4 @@ class HBnBFacade:
         user.delete_review(review)
         place.delete_review(review)
         self.review_repo.delete(review_id)
->>>>>>> e3aae9bdad1665e905a72014d83d2429b964e26c
+
