@@ -1,5 +1,3 @@
-from app.persistence.repository import SQLAlchemyRepository 
-
 from typing import List, Optional, TYPE_CHECKING
 from app.models.base import BaseModel
 from app.persistence.repository import Repository
@@ -42,7 +40,7 @@ class Place(BaseModel):
         self.amenities = amenities if amenities is not None else []
 
         # Convertir owner_id → objet owner (User)
-        repo = UserRepository()
+        repo = Repository()
         user_obj = repo.get(owner_id)
         if user_obj is None:
             raise ValueError(f"Aucun utilisateur trouvé avec l'ID {owner_id}")
@@ -79,10 +77,10 @@ from app.models.review import Review
 
 class HBnBFacade:
     def __init__(self):
-        self.user_repo = SQLAlchemyRepository(User)
-        self.amenity_repo = SQLAlchemyRepository(Amenity)
-        self.place_repo = SQLAlchemyRepository(Place)
-        self.review_repo = SQLAlchemyRepository(Review)
+        self.user_repo = InMemoryRepository(User)
+        self.amenity_repo = InMemoryRepository(Amenity)
+        self.place_repo = InMemoryRepository(Place)
+        self.review_repo = InMemoryRepository(Review)
 
     def create_user(self, user_data):
         password = user_data.pop('password')
