@@ -65,7 +65,7 @@ part3/
 ├── config.py
 ├── run.py
 ├── requirements.txt
-├── er_diagram.md
+├── erDiagram.mmd
 └── README.md
 
 ## ⚙️ Technologies Utilisées
