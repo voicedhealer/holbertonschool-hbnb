@@ -70,7 +70,6 @@ class Place(BaseModel):
             'amenities': [a.id for a in self.amenities] if self.amenities else [],
         }
 
-
 class HBnBFacade:
     def __init__(self):
         self.user_repo = InMemoryRepository()
