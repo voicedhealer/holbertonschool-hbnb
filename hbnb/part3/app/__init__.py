@@ -20,6 +20,7 @@ def create_app(config_class="app.config.DevelopmentConfig"):
     jwt.init_app(app)
     
     # 2. On enregistre les blueprints ou les namespaces
+    from app.api.v1.auth import api as auth_ns
     from app.api.v1.users import api as users_ns
     from app.api.v1.amenities import api as amenities_ns
     from app.api.v1.places import api as places_ns
@@ -39,6 +40,7 @@ def create_app(config_class="app.config.DevelopmentConfig"):
     
     # Enregistrement des namespaces
     # Le chemin est déjà dans le namespace, pas besoin de le redéfinir ici
+    api.add_namespace(auth_ns, path='/api/v1/auth')
     api.add_namespace(users_ns)
     api.add_namespace(amenities_ns)
     api.add_namespace(places_ns)
