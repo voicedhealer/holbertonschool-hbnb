@@ -28,6 +28,7 @@ Troisième partie du projet ""HBnB"", application web inspirée d'Airbnb. Cette 
 ---
 
 ## 🗃️ Structure du Projet
+```
 holbertonschool-hbnb/
 └── hbnb/
     ├── app/
@@ -59,6 +60,7 @@ holbertonschool-hbnb/
     ├── requirements.txt
     ├── README.md
     └── erDiagram.mmd
+```
 
 ## ⚙️ Technologies Utilisées
 
