@@ -24,7 +24,7 @@ class Place(BaseModel):
             raise ValueError("Title cannot be empty")
         if not isinstance(value, str):
             raise TypeError("Title must be a string")
-        super().is_max_length('title', value, 100)
+        BaseModel.is_max_length(self, 'title', value, 100)
         self.__title = value
 
     @property

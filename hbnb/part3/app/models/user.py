@@ -23,7 +23,7 @@ class User(UserMixin, db.Model):
     def first_name(self, value):
         if not isinstance(value, str):
             raise TypeError("First name must be a string")
-        super().is_max_length('First name', value, 50)
+        BaseModel.is_max_length(self, 'First name', value, 50)
         self.__first_name = value
 
     @property
@@ -34,8 +34,9 @@ class User(UserMixin, db.Model):
     def last_name(self, value):
         if not isinstance(value, str):
             raise TypeError("Last name must be a string")
-        super().is_max_length('Last name', value, 50)
+        BaseModel.is_max_length(self, 'Last name', value, 50)
         self.__last_name = value
+
 
     @property
     def email(self):

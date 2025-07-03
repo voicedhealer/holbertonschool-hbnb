@@ -16,7 +16,7 @@ class Amenity(BaseModel):
 			raise TypeError("Name must be a string")
 		if not value:
 			raise ValueError("Name cannot be empty")
-		super().is_max_length('Name', value, 50)
+		BaseModel.is_max_length(self, 'Name', value, 50)
 		self.__name = value
 
 	def update(self, data):
