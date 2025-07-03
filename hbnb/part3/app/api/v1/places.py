@@ -1,5 +1,6 @@
 from flask_restx import Namespace, Resource, fields
 from app.services import facade
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 
 api = Namespace('places', description='Place operations')
 
@@ -27,6 +28,23 @@ place_model = api.model('Place', {
     'owner': fields.Nested(user_model, description='Owner details'),
     'amenities': fields.List(fields.String, required=True, description="List of amenities ID's")
 })
+
+@api.route('/places/<place_id>')
+class AdminPlaceModify(Resource):
+    @jwt_required()
+    def put(self, place_id):
+        current_user = get_jwt_identity()
+
+        # Définissez is_admin par défaut sur False s'il n'existe pas
+        is_admin = current_user.get('is_admin', False)
+        user_id = current_user.get('id')
+
+        place = facade.get_place(place_id)
+        if not is_admin and place.owner_id != user_id:
+            return {'error': 'Unauthorized action'}, 403
+
+        # Logique pour mettre à jour le lieu
+        pass
 
 @api.route('/')
 class PlaceList(Resource):

@@ -14,17 +14,24 @@ def create_app(config_class="app.config.DevelopmentConfig"):
     """
     app = Flask(__name__)
     app.config.from_object(config_class)
+    app.config["JWT_SECRET_KEY"] = "votre_cle_secrete"
+    
     # 1. On initialise les extensions
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
     
     # 2. On enregistre les blueprints ou les namespaces
-    from app.api.v1.auth import api as auth_ns
+    from .api.v1.users import users_bp
+    from app.api.v1.users import users_bp
     from app.api.v1.users import api as users_ns
     from app.api.v1.amenities import api as amenities_ns
     from app.api.v1.places import api as places_ns
     from app.api.v1.reviews import api as reviews_ns
+    from app.api.v1.users import api as users_api
+    from app.api.v1.auth import api as auth_ns
+
+    app.register_blueprint(users_bp, url_prefix='/api/v1/users')
 
     authorizations = {
         'jwt': {
@@ -36,7 +43,8 @@ def create_app(config_class="app.config.DevelopmentConfig"):
     }
 
     api = Api(app, version='1.0', title='HBnB API', description='HBnB Application API',
-               authorizations=authorizations, security='jwt')
+          authorizations=authorizations, security='jwt')
+    api.add_namespace(users_api, path='/api/v1/users')
     
     # Enregistrement des namespaces
     # Le chemin est déjà dans le namespace, pas besoin de le redéfinir ici
