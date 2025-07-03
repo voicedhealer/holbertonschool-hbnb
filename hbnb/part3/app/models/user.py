@@ -79,10 +79,12 @@ class User(UserMixin, db.Model):
 
     def to_dict(self):
         return {
-            'id': self.id,
-            'first_name': self.first_name,
-            'last_name': self.last_name,
-            'email': self.email
+        'id': self.id,
+        'username': self.username,
+        'first_name': self.first_name,
+        'last_name': self.last_name,
+        'email': self.email,
+        'is_admin': self.is_admin
         }
 
     __tablename__ = 'app_users'
@@ -95,19 +97,19 @@ class User(UserMixin, db.Model):
     
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
 
-    def hash_password(self, password_to_hash):
+    def hash_password(self, password):
         """
         Hashes the password before storing it.
         """
         # L'énoncé stocke le résultat dans self.password
-        self.password = bcrypt.generate_password_hash(password_to_hash).decode('utf-8')
+        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
 
-    def verify_password(self, password_to_check):
+    def verify_password(self, password):
         """
         Verifies if the provided password matches the hashed password.
         """
         # L'énoncé compare avec self.password
-        return bcrypt.check_password_hash(self.password, password_to_check)
+        return bcrypt.check_password_hash(self.password, password)
 
     def __repr__(self):
         """

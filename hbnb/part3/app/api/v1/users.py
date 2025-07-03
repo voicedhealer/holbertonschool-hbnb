@@ -69,7 +69,7 @@ class UserList(Resource):
             return {'error': 'Email already registered'}, 400
         try:
             new_user = facade.create_user(user_data)
-            return new_user.to_dict(), 201
+            return {'id': new_user.id, 'message': 'User successfully created'}, 201
         except Exception as e:
             return {'error': str(e)}, 400
     @api.response(200, 'List of users retrieved successfully')
