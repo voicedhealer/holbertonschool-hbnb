@@ -97,7 +97,7 @@ Les entités principales sont :
 - `Amenity` 🛁
 - `Place_Amenity` (table d’association) 🔗
 
-👉 Voir le fichier [`er_diagram.md`](./er_diagram.md) pour le schéma complet.
+👉 Voir le fichier [`erDiagram.mmd`](./erDiagram.mmd) pour le schéma complet.
 
 ---
 
