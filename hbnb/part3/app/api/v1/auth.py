@@ -2,14 +2,45 @@ from flask_restx import Namespace, Resource, fields
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.services import facade
+from flask_jwt_extended import jwt_required, get_jwt
+from flask import jsonify
+from functools import wraps
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import create_access_token
 
 api = Namespace('auth', description='Authentication operations')
+auth_bp = Blueprint('auth', __name__)
 
 # Modèle de validation des entrées
 login_model = api.model('Login', {
     'email': fields.String(required=True, description='User email'),
     'password': fields.String(required=True, description='User password')
 })
+
+def role_required(role):
+    def decorator(fn):
+        @wraps(fn)
+        @jwt_required()
+        def wrapper(*args, **kwargs):
+            claims = get_jwt()
+            if not claims.get(role, False):
+                return jsonify(msg=f"Accès refusé : {role} requis"), 403
+            return fn(*args, **kwargs)
+        return wrapper
+    return decorator
+
+@auth_bp.route('/login', methods=['POST'])
+def login():
+    username = request.json.get('username')
+    password = request.json.get('password')
+    # Remplace cette logique par la tienne (vérification en base)
+    if username == 'admin' and password == 'adminpass':
+        access_token = create_access_token(identity=username, additional_claims={"is_admin": True})
+        return jsonify(access_token=access_token)
+    elif username == 'user' and password == 'userpass':
+        access_token = create_access_token(identity=username, additional_claims={"is_admin": False})
+        return jsonify(access_token=access_token)
+    return jsonify(msg="Identifiants invalides"), 401
 
 @api.route('/login')
 class Login(Resource):
