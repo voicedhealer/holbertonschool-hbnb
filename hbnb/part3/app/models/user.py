@@ -1,6 +1,6 @@
 from .basemodel import BaseModel
-from app import db, bcrypt
 from flask_login import UserMixin
+from app import db
 import re
 
 class User(UserMixin, db.Model):
