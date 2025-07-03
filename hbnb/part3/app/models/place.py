@@ -72,15 +72,15 @@ class Place(BaseModel):
         self.__owner = value
 
     def add_review(self, review):
-        """Add a review to the place."""
+        """Ajouter un avis sur le lieu"""
         self.reviews.append(review)
     
     def delete_review(self, review):
-        """Add an amenity to the place."""
+        """Ajouter un agrément au lieu"""
         self.reviews.remove(review)
 
     def add_amenity(self, amenity):
-        """Add an amenity to the place."""
+        """Ajouter un agrément au lieu"""
         self.amenities.append(amenity)
 
     def to_dict(self):

@@ -3,7 +3,7 @@ from app.services import facade
 
 api = Namespace('reviews', description='Review operations')
 
-# Define the review model for input validation and documentation
+# Définir le modèle de révision pour la validation et la documentation des entrées
 review_model = api.model('Review', {
     'text': fields.String(required=True, description='Text of the review'),
     'rating': fields.Integer(required=True, description='Rating of the place (1-5)'),
@@ -17,7 +17,7 @@ class ReviewList(Resource):
     @api.response(201, 'Review successfully created')
     @api.response(400, 'Invalid input data')
     def post(self):
-        """Register a new review"""
+        """Enregistrer un nouvel avis"""
         review_data = api.payload
         place = facade.get_place(review_data['place_id'])
         if not place:
@@ -35,7 +35,7 @@ class ReviewList(Resource):
 
     @api.response(200, 'List of reviews retrieved successfully')
     def get(self):
-        """Retrieve a list of all reviews"""
+        """Récupérer une liste de tous les avis"""
         return [review.to_dict() for review in facade.get_all_reviews()], 200
 
 @api.route('/<review_id>')
@@ -43,7 +43,7 @@ class ReviewResource(Resource):
     @api.response(200, 'Review details retrieved successfully')
     @api.response(404, 'Review not found')
     def get(self, review_id):
-        """Get review details by ID"""
+        """Obtenir les détails de l'avis par identifiant"""
         review = facade.get_review(review_id)
         if not review:
             return {'error': 'Review not found'}, 404
@@ -54,7 +54,7 @@ class ReviewResource(Resource):
     @api.response(404, 'Review not found')
     @api.response(400, 'Invalid input data')
     def put(self, review_id):
-        """Update a review's information"""
+        """Mettre à jour les informations d'un avis"""
         review_data = api.payload
         review = facade.get_review(review_id)
         if not review:
@@ -69,7 +69,7 @@ class ReviewResource(Resource):
     @api.response(200, 'Review deleted successfully')
     @api.response(404, 'Review not found')
     def delete(self, review_id):
-        """Delete a review"""
+        """Supprimer un avis"""
         review = facade.get_review(review_id)
         if not review:
             return {'error': 'Review not found'}, 404

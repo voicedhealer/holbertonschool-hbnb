@@ -3,7 +3,7 @@ from app.services import facade
 
 api = Namespace('amenities', description='Amenity operations')
 
-# Define the amenity model for input validation and documentation
+# Définir le modèle d'agrément pour la validation et la documentation des entrées
 amenity_model = api.model('Amenity', {
     'name': fields.String(required=True, description='Name of the amenity')
 })
@@ -14,7 +14,7 @@ class AmenityList(Resource):
     @api.response(201, 'Amenity successfully created')
     @api.response(400, 'Invalid input data')
     def post(self):
-        """Register a new amenity"""
+        "Enregistrer un nouvel équipement"
         amenity_data = api.payload
         
         existing_amenity = facade.amenity_repo.get_by_attribute('name', amenity_data.get('name'))
@@ -28,7 +28,7 @@ class AmenityList(Resource):
 
     @api.response(200, 'List of amenities retrieved successfully')
     def get(self):
-        """Retrieve a list of all amenities"""
+        """Récupérer une liste de toutes les commodités"""
         amenities = facade.get_all_amenities()
         return [amenity.to_dict() for amenity in amenities], 200
 
@@ -37,7 +37,7 @@ class AmenityResource(Resource):
     @api.response(200, 'Amenity details retrieved successfully')
     @api.response(404, 'Amenity not found')
     def get(self, amenity_id):
-        """Get amenity details by ID"""
+        '''Obtenir des informations sur les équipements par pièce d'identité'''
         amenity = facade.get_amenity(amenity_id)
         if not amenity:
             return {'error': 'Amenity not found'}, 404

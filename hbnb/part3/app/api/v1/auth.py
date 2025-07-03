@@ -1,5 +1,6 @@
 from flask_restx import Namespace, Resource, fields
 from flask_jwt_extended import create_access_token
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.services import facade
 
 api = Namespace('auth', description='Authentication operations')
@@ -14,7 +15,7 @@ login_model = api.model('Login', {
 class Login(Resource):
     @api.expect(login_model)
     def post(self):
-        """Authenticate user and return a JWT token"""
+        "Authentifier l'utilisateur et renvoyer un jeton JWT"
         credentials = api.payload  # Récupérez l'e-mail et le mot de passe à partir de la charge utile de la requête
         
         # Étape 1 : Récupérer l'utilisateur en fonction de l'e-mail fourni
@@ -29,3 +30,12 @@ class Login(Resource):
         
         # Étape 4 : renvoyer le jeton JWT au client
         return {'access_token': access_token}, 200
+
+@api.route('/protected')
+class ProtectedResource(Resource):
+    @jwt_required()
+    def get(self):
+        """Un point de terminaison protégé qui nécessite un jeton JWT valide"""
+        current_user = get_jwt_identity()  # Récupérer l'identité de l'utilisateur à partir du jeton
+        return {'message': f'Hello, user {current_user["id"]}'}, 200
+    

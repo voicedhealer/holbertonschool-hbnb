@@ -8,15 +8,15 @@ class BaseModel:
         self.updated_at = datetime.now()
 
     def save(self):
-        """Update the updated_at timestamp whenever the object is modified"""
+        """Mettre à jour l'horodatage updated_at chaque fois que l'objet est modifié"""
         self.updated_at = datetime.now()
 
     def update(self, data):
-        """Update the attributes of the object based on the provided dictionary"""
+        """Mettre à jour les attributs de l'objet en fonction du dictionnaire fourni"""
         for key, value in data.items():
             if hasattr(self, key):
                 setattr(self, key, value)
-        self.save()  # Update the updated_at timestamp
+        self.save()  # Mettre à jour l'horodatage updated_at
         
     def is_max_length(self, name, value, max_length):
         if len(value) > max_length:
