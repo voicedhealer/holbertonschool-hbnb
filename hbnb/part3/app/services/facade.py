@@ -52,7 +52,7 @@ class Place(BaseModel):
         self.amenities.append(amenity)
 
     def to_dict(self):
-        """Retourne un dictionnaire représentant le lieu."""
+        """Retourne un dictionnaire représentant le lieu"""
         return {
             'id': str(self.id),
             'title': self.title,
@@ -66,7 +66,6 @@ class Place(BaseModel):
             'address': self.address,
             'amenities': [a.id for a in self.amenities] if self.amenities else [],
         }
-
 
 class HBnBFacade:
     def __init__(self):

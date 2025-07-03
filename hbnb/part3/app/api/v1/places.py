@@ -34,7 +34,7 @@ class PlaceList(Resource):
     @api.response(201, 'Place successfully created')
     @api.response(400, 'Invalid input data')
     def post(self):
-        """Register a new place"""
+        """Enregistrer un nouveau lieu"""
         place_data = api.payload
         owner = place_data.get('owner_id', None)
 
@@ -52,7 +52,7 @@ class PlaceList(Resource):
 
     @api.response(200, 'List of places retrieved successfully')
     def get(self):
-        """Retrieve a list of all places"""
+        """Récupérer une liste de tous les lieux"""
         places = facade.get_all_places()
         return [place.to_dict() for place in places], 200
 
@@ -61,7 +61,7 @@ class PlaceResource(Resource):
     @api.response(200, 'Place details retrieved successfully')
     @api.response(404, 'Place not found')
     def get(self, place_id):
-        """Get place details by ID"""
+        """Obtenir les détails du lieu par identifiant"""
         place = facade.get_place(place_id)
         if not place:
             return {'error': 'Place not found'}, 404
@@ -72,7 +72,7 @@ class PlaceResource(Resource):
     @api.response(404, 'Place not found')
     @api.response(400, 'Invalid input data')
     def put(self, place_id):
-        """Update a place's information"""
+        """Mettre à jour les informations d'un lieu"""
         place_data = api.payload
         place = facade.get_place(place_id)
         if not place:
@@ -112,7 +112,7 @@ class PlaceReviewList(Resource):
     @api.response(200, 'List of reviews for the place retrieved successfully')
     @api.response(404, 'Place not found')
     def get(self, place_id):
-        """Get all reviews for a specific place"""
+        """Obtenez tous les avis sur un lieu spécifique"""
         place = facade.get_place(place_id)
         if not place:
             return {'error': 'Place not found'}, 404

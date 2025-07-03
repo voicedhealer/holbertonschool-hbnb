@@ -14,7 +14,7 @@ class AmenityList(Resource):
     @api.response(201, 'Amenity successfully created')
     @api.response(400, 'Invalid input data')
     def post(self):
-        "Enregistrer un nouvel équipement"
+        """Enregistrer un nouvel équipement"""
         amenity_data = api.payload
         
         existing_amenity = facade.amenity_repo.get_by_attribute('name', amenity_data.get('name'))
@@ -37,7 +37,7 @@ class AmenityResource(Resource):
     @api.response(200, 'Amenity details retrieved successfully')
     @api.response(404, 'Amenity not found')
     def get(self, amenity_id):
-        '''Obtenir des informations sur les équipements par pièce d'identité'''
+        """Obtenir des informations sur les équipements par pièce d'identité"""
         amenity = facade.get_amenity(amenity_id)
         if not amenity:
             return {'error': 'Amenity not found'}, 404

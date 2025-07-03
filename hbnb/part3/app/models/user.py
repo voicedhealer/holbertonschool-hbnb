@@ -66,15 +66,15 @@ class User(UserMixin, db.Model):
         self.__is_admin = value
 
     def add_place(self, place):
-        """Add an amenity to the place."""
+        """Ajouter un agrément au lieu"""
         self.places.append(place)
 
     def add_review(self, review):
-        """Add an amenity to the place."""
+        """Ajouter un agrément au lieu"""
         self.reviews.append(review)
 
     def delete_review(self, review):
-        """Add an amenity to the place."""
+        """Ajouter un agrément au lieu"""
         self.reviews.remove(review)
 
     def to_dict(self):
@@ -98,21 +98,15 @@ class User(UserMixin, db.Model):
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
 
     def hash_password(self, password):
-        """
-        Hashes the password before storing it.
-        """
+        """Hache le mot de passe avant de le stocker"""
         # L'énoncé stocke le résultat dans self.password
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
 
     def verify_password(self, password):
-        """
-        Verifies if the provided password matches the hashed password.
-        """
+        """Vérifie si le mot de passe fourni correspond au mot de passe haché"""
         # L'énoncé compare avec self.password
         return bcrypt.check_password_hash(self.password, password)
 
     def __repr__(self):
-        """
-        Représentation utile pour le débogage.
-        """
+        """Représentation utile pour le débogage"""
         return f'<User {self.username}>'

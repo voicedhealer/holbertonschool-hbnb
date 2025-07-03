@@ -15,7 +15,7 @@ login_model = api.model('Login', {
 class Login(Resource):
     @api.expect(login_model)
     def post(self):
-        "Authentifier l'utilisateur et renvoyer un jeton JWT"
+        """Authentifier l'utilisateur et renvoyer un jeton JWT"""
         credentials = api.payload  # Récupérez l'e-mail et le mot de passe à partir de la charge utile de la requête
         
         # Étape 1 : Récupérer l'utilisateur en fonction de l'e-mail fourni
