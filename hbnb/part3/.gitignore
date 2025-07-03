@@ -4,4 +4,4 @@ __pycache__
 testss
 test_api.py
 test_facade.py
-app.zip
+*.zip
