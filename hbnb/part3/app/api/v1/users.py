@@ -2,7 +2,7 @@ from flask_restx import Namespace, Resource, fields
 from flask import request
 from flask import Blueprint, jsonify
 from flask_jwt_extended import create_access_token
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import abort
 from app.services import facade
 from app.models.user import User
@@ -10,11 +10,12 @@ from .auth import role_required
 
 users_bp = Blueprint('users', __name__)
 api = Namespace('users', description='User operations')
+
 login_model = api.model('Login', {
     'username': fields.String(required=True),
     'password': fields.String(required=True)
 })
-# Défini le modèle utilisateur pour la validation et la documentation des entrées
+
 user_model = api.model('User', {
     'first_name': fields.String(required=True),
     'last_name': fields.String(required=True),
@@ -36,8 +37,8 @@ def user_profile():
 @users_bp.route('/admin', methods=['GET'])
 @jwt_required()
 def admin_only():
-    claims = get_jwt()
-    if not claims.get('is_admin', False):
+    current_user = get_jwt_identity()
+    if not current_user.get('is_admin'):
         return jsonify(msg="Accès refusé : administrateur requis"), 403
     return jsonify(msg="Bienvenue, administrateur !"), 200
 
@@ -49,8 +50,8 @@ class AdminUserCreateList(Resource):
     @jwt_required()
     def post(self):
         """Créer un nouvel utilisateur (admin uniquement)"""
-        claims = get_jwt()
-        if not claims.get('is_admin', False):
+        current_user = get_jwt_identity()
+        if not current_user.get('is_admin'):
             return {'error': 'Admin privileges required'}, 403
 
         user_data = api.payload or request.json
@@ -67,8 +68,8 @@ class AdminUserCreateList(Resource):
     @jwt_required()
     def get(self):
         """Lister tous les utilisateurs (admin uniquement)"""
-        claims = get_jwt()
-        if not claims.get('is_admin', False):
+        current_user = get_jwt_identity()
+        if not current_user.get('is_admin'):
             return {'error': 'Admin privileges required'}, 403
         users = facade.get_users()
         return [user.to_dict() for user in users], 200
@@ -80,8 +81,8 @@ class AdminUserResource(Resource):
     @jwt_required()
     def get(self, user_id):
         """Obtenir les détails d'un utilisateur par ID (admin uniquement)"""
-        claims = get_jwt()
-        if not claims.get('is_admin', False):
+        current_user = get_jwt_identity()
+        if not current_user.get('is_admin'):
             return {'error': 'Admin privileges required'}, 403
         user = facade.get_user_by_id(user_id)
         if not user:
@@ -95,8 +96,8 @@ class AdminUserResource(Resource):
     @jwt_required()
     def put(self, user_id):
         """Mettre à jour un utilisateur (admin uniquement)"""
-        claims = get_jwt()
-        if not claims.get('is_admin', False):
+        current_user = get_jwt_identity()
+        if not current_user.get('is_admin'):
             return {'error': 'Admin privileges required'}, 403
 
         user_data = api.payload or request.json
@@ -123,12 +124,11 @@ class Me(Resource):
     @jwt_required()
     def get(self):
         """Obtenir les infos de l'utilisateur connecté"""
-        user_id = get_jwt_identity()
-        claims = get_jwt()
-        user = User.query.get(user_id)
+        current_user = get_jwt_identity()
+        user = User.query.get(current_user['id'])
         return {
             "username": user.username,
-            "is_admin": claims.get("is_admin", False)
+            "is_admin": current_user.get("is_admin", False)
         }
 
 # --- Endpoint de connexion ---
@@ -141,8 +141,8 @@ class Login(Resource):
         data = request.json
         user = User.query.filter_by(username=data['username']).first()
         if user and user.verify_password(data['password']):
-            additional_claims = {"is_admin": user.is_admin}
-            token = create_access_token(identity=user.id, additional_claims=additional_claims)
+            # Stockage du rôle dans identity (IMPORTANT)
+            token = create_access_token(identity={'id': user.id, 'is_admin': user.is_admin})
             return {"access_token": token}, 200
         return {"msg": "Mauvais identifiants"}, 401
 
@@ -153,7 +153,7 @@ class AdminOnly(Resource):
     @jwt_required()
     def get(self):
         """Endpoint protégé accessible uniquement aux administrateurs"""
-        claims = get_jwt()
-        if not claims.get("is_admin", False):
+        current_user = get_jwt_identity()
+        if not current_user.get("is_admin", False):
             return {'error': 'Admin privileges required'}, 403
         return {"msg": "Bienvenue, admin !"}
