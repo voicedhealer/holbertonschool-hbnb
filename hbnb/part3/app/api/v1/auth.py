@@ -1,72 +1,90 @@
 from flask_restx import Namespace, Resource, fields
-from flask_jwt_extended import create_access_token
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.services import facade
-from flask_jwt_extended import jwt_required, get_jwt
-from flask import jsonify
+from flask import request, jsonify, Blueprint
+from flask_jwt_extended import (
+    create_access_token, jwt_required, get_jwt_identity
+)
 from functools import wraps
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token
+from app.services import facade
 
-api = Namespace('auth', description='Authentication operations')
+# Déclaration du Blueprint Flask pour l'auth
 auth_bp = Blueprint('auth', __name__)
 
-# Modèle de validation des entrées
+# Namespace RESTX pour la documentation et la structure d'API
+api = Namespace('auth', description='Authentication operations')
+
+# Modèle de validation des entrées pour Swagger/RESTX
 login_model = api.model('Login', {
     'email': fields.String(required=True, description='User email'),
     'password': fields.String(required=True, description='User password')
 })
 
+# Décorateur pour restreindre l'accès selon le rôle
 def role_required(role):
     def decorator(fn):
         @wraps(fn)
         @jwt_required()
         def wrapper(*args, **kwargs):
-            claims = get_jwt()
-            if not claims.get(role, False):
+            current_user = get_jwt_identity()
+            if not current_user.get(role, False):
                 return jsonify(msg=f"Accès refusé : {role} requis"), 403
             return fn(*args, **kwargs)
         return wrapper
     return decorator
 
+# Endpoint Flask classique pour login (utile pour compatibilité ou tests)
 @auth_bp.route('/login', methods=['POST'])
-def login():
-    username = request.json.get('username')
+def login_flask():
+    email = request.json.get('email')
     password = request.json.get('password')
-    # Remplace cette logique par la tienne (vérification en base)
-    if username == 'admin' and password == 'adminpass':
-        access_token = create_access_token(identity=username, additional_claims={"is_admin": True})
-        return jsonify(access_token=access_token)
-    elif username == 'user' and password == 'userpass':
-        access_token = create_access_token(identity=username, additional_claims={"is_admin": False})
-        return jsonify(access_token=access_token)
-    return jsonify(msg="Identifiants invalides"), 401
+    user = facade.get_user_by_email(email)
+    if not user or not user.verify_password(password):
+        return jsonify(msg="Identifiants invalides"), 401
+    access_token = create_access_token(
+        identity={'id': str(user.id), 'is_admin': user.is_admin}
+    )
+    return jsonify(access_token=access_token), 200
 
+# Endpoint RESTX pour login (pour la doc et la structure d'API)
 @api.route('/login')
 class Login(Resource):
     @api.expect(login_model)
     def post(self):
         """Authentifier l'utilisateur et renvoyer un jeton JWT"""
-        credentials = api.payload  # Récupérez l'e-mail et le mot de passe à partir de la charge utile de la requête
-        
-        # Étape 1 : Récupérer l'utilisateur en fonction de l'e-mail fourni
+        credentials = api.payload
         user = facade.get_user_by_email(credentials['email'])
-        
-        # Étape 2 : Vérifiez si l’utilisateur existe et si le mot de passe est correct
         if not user or not user.verify_password(credentials['password']):
             return {'error': 'Invalid credentials'}, 401
-
-        # Étape 3 : Créez un jeton JWT avec l'ID de l'utilisateur et l'indicateur is_admin
-        access_token = create_access_token(identity={'id': str(user.id), 'is_admin': user.is_admin})
-        
-        # Étape 4 : renvoyer le jeton JWT au client
+        access_token = create_access_token(
+            identity={'id': str(user.id), 'is_admin': user.is_admin}
+        )
         return {'access_token': access_token}, 200
 
+# Exemple d'endpoint protégé, accessible à tout utilisateur connecté
+@auth_bp.route('/protected', methods=['GET'])
+@jwt_required()
+def protected_flask():
+    current_user = get_jwt_identity()
+    return jsonify(message=f'Hello, user {current_user["id"]}'), 200
+
+# Exemple d'endpoint protégé RESTX
 @api.route('/protected')
 class ProtectedResource(Resource):
     @jwt_required()
     def get(self):
-        """Un point de terminaison protégé qui nécessite un jeton JWT valide"""
-        current_user = get_jwt_identity()  # Récupérer l'identité de l'utilisateur à partir du jeton
+        current_user = get_jwt_identity()
         return {'message': f'Hello, user {current_user["id"]}'}, 200
-    
+
+# Exemple d'endpoint admin-only avec Blueprint Flask
+@auth_bp.route('/admin-protected', methods=['GET'])
+@role_required('is_admin')
+def admin_protected_flask():
+    current_user = get_jwt_identity()
+    return jsonify(message=f'Bienvenue, admin {current_user["id"]}!'), 200
+
+# Exemple d'endpoint admin-only RESTX
+@api.route('/admin-protected')
+class AdminProtectedResource(Resource):
+    @role_required('is_admin')
+    def get(self):
+        current_user = get_jwt_identity()
+        return {'message': f'Bienvenue, admin {current_user["id"]}!'}, 200
