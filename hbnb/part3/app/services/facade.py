@@ -4,7 +4,9 @@ from app.models.amenity import Amenity
 from app.models.place import Place
 
 from app.persistence.repository import SQLAlchemyRepository
+from app.persistence.user_repository import UserRepository
 
+user_repo = UserRepository()
 
 class HBnBFacade:
     def __init__(self):
