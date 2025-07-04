@@ -1,12 +1,11 @@
 from .basemodel import BaseModel
 from flask_login import UserMixin
-from app import db
+from app import db, bcrypt
 import re
 
-class User(UserMixin, db.Model):
+class User(UserMixin, BaseModel):
     __tablename__ = 'app_users'
 
-    id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False, index=True)
     password = db.Column(db.String(128), nullable=False)
     _first_name = db.Column("first_name", db.String(50), nullable=False)
@@ -22,7 +21,7 @@ class User(UserMixin, db.Model):
     def first_name(self, value):
         if not isinstance(value, str):
             raise TypeError("First name must be a string")
-        BaseModel.is_max_length(self, 'First name', value, 50)
+        self.is_max_length('First name', value, 50)
         self._first_name = value
 
     @property
@@ -33,7 +32,7 @@ class User(UserMixin, db.Model):
     def last_name(self, value):
         if not isinstance(value, str):
             raise TypeError("Last name must be a string")
-        BaseModel.is_max_length(self, 'Last name', value, 50)
+        self.is_max_length('Last name', value, 50)
         self._last_name = value
 
     @property
