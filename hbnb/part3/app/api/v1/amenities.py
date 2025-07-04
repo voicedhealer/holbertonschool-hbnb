@@ -1,7 +1,7 @@
 from flask_restx import Namespace, Resource, fields
 from flask import request
 from app.services import facade
-from flask_jwt_extended import jwt_required, get_jwt
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 api = Namespace('amenities', description='Amenity operations')
 
@@ -18,8 +18,8 @@ class AmenityAdminCreate(Resource):
     @jwt_required()
     def post(self):
         """Créer un nouvel équipement (admin uniquement)"""
-        claims = get_jwt()
-        if not claims.get('is_admin', False):
+        current_user = get_jwt_identity()
+        if not current_user.get('is_admin'):
             return {'error': 'Admin privileges required'}, 403
 
         amenity_data = api.payload or request.json
@@ -38,8 +38,8 @@ class AmenityAdminUpdate(Resource):
     @jwt_required()
     def put(self, amenity_id):
         """Modifier un équipement (admin uniquement)"""
-        claims = get_jwt()
-        if not claims.get('is_admin', False):
+        current_user = get_jwt_identity()
+        if not current_user.get('is_admin'):
             return {'error': 'Admin privileges required'}, 403
 
         amenity_data = api.payload or request.json
