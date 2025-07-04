@@ -146,6 +146,25 @@ class Login(Resource):
             return {"access_token": token}, 200
         return {"msg": "Mauvais identifiants"}, 401
 
+@api.route('/setup')
+class Setup(Resource):
+    def post(self):
+        """Crée un compte admin SANS authentification (à supprimer après usage)"""
+        default_admin = {
+            "first_name": "Jean",
+            "last_name": "Michel",
+            "email": "admin@email.com",
+            "password": "admin123",
+            "is_admin": True
+        }
+
+        existing = facade.get_user_by_email(default_admin["email"])
+        if existing:
+            return {"msg": "Admin déjà existant"}, 400
+
+        new_user = facade.create_user(default_admin)
+        return {"msg": "Admin créé", "id": new_user.id}, 201
+
 # --- Endpoint bonus pour tester l'accès admin ---
 
 @api.route('/admin')
