@@ -32,6 +32,7 @@ Troisième partie du projet ""HBnB"", application web inspirée d'Airbnb. Cette 
 holbertonschool-hbnb/
 └── hbnb/
     ├── app/
+    │   ├── config.py    
     │   ├── __init__.py
     │   ├── api/
     │   │   ├── __init__.py
@@ -56,7 +57,6 @@ holbertonschool-hbnb/
     │       ├── __init__.py
     │       ├── repository.py
     ├── run.py
-    ├── config.py
     ├── requirements.txt
     ├── README.md
     └── erDiagram.mmd
