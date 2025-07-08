@@ -21,7 +21,7 @@ user_model = api.model('User', {
     'last_name': fields.String(required=True),
     'email': fields.String(required=True),
     'password': fields.String(required=True),
-    'is_admin': fields.Boolean()  # création d’un user admin via l’API
+    'is_admin': fields.Boolean(True)  # création d’un user admin via l’API
 })
 
 @users_bp.route('/admin2', methods=['GET'])
