@@ -12,6 +12,7 @@ class User(UserMixin, BaseModel):
     _last_name = db.Column("last_name", db.String(50), nullable=False)
     _email = db.Column("email", db.String(120), unique=True, nullable=False)
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
+    role = db.Column(db.String(80), nullable=False, default='user')
 
     @property
     def first_name(self):
