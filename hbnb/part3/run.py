@@ -10,10 +10,8 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 print("PYTHONPATH:", sys.path)  # Debug temporaire
 
 from app import create_app, db
-from app.models.user import User
 
 app = create_app()
-
 
 # === Test endpoint pour debug POST ===
 @app.route('/test_post', methods=['POST'])
