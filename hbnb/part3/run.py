@@ -1,14 +1,19 @@
 import sys
 import os
 import webbrowser
+import click
+from flask import current_app as app
 
 # Chemin du projet
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 print("PYTHONPATH:", sys.path)  # Debug temporaire
 
-from app import create_app
+from app import create_app, db
+from app.models.user import User
+
 app = create_app()
+
 
 # === Test endpoint pour debug POST ===
 @app.route('/test_post', methods=['POST'])
@@ -16,7 +21,6 @@ def test_post():
     print("DEBUG: /test_post called")
     return {"ok": True}
 # === Fin test endpoint ===
-
 if __name__ == "__main__":
     # Ouvre Swagger UI automatiquement
     webbrowser.open("http://localhost:5001")

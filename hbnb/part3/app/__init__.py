@@ -8,6 +8,7 @@ db = SQLAlchemy()
 bcrypt = Bcrypt()
 jwt = JWTManager()
 
+
 def create_app(config_class="app.config.DevelopmentConfig"):
     """
     Factory pour créer et configurer l'instance de l'application Flask.
@@ -15,13 +16,14 @@ def create_app(config_class="app.config.DevelopmentConfig"):
     app = Flask(__name__)
     app.config.from_object(config_class)
     app.config["JWT_SECRET_KEY"] = "votre_cle_secrete"
-    
-    # 1. On initialise les extensions
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
+
+    # Initialisation des extensions
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
-    
-    # 2. On enregistre les blueprints ou les namespaces
+
+    # Importation et enregistrement des blueprints/namespaces
     from .api.v1.users import users_bp
     from app.api.v1.users import users_bp
     from app.api.v1.users import api as users_ns
@@ -38,27 +40,32 @@ def create_app(config_class="app.config.DevelopmentConfig"):
             'type': 'apiKey',
             'in': 'header',
             'name': 'Authorization',
-            'description': "Entrez 'Bearer <token>' pour l'authentification. Exemple: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'"
+            'description': (
+                "Entrez 'Bearer <token>' pour l'authentification. "
+                "Exemple: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'"
+            )
         }
     }
 
-    api = Api(app, version='1.0', title='HBnB API', description='HBnB Application API',
-          authorizations=authorizations, security='jwt')
+    api = Api(
+        app,
+        version='1.0',
+        title='HBnB API',
+        description='HBnB Application API',
+        authorizations=authorizations,
+        security='jwt'
+    )
     api.add_namespace(users_api, path='/api/v1/users')
-    
-    # Enregistrement des namespaces
-    # Le chemin est déjà dans le namespace, pas besoin de le redéfinir ici
     api.add_namespace(auth_ns, path='/api/v1/auth')
     api.add_namespace(users_ns)
     api.add_namespace(amenities_ns)
     api.add_namespace(places_ns)
     api.add_namespace(reviews_ns)
-    # 3. On configure les routes de l'application
+
     @app.cli.command("init-db")
     def init_db_command():
-        """Crée toutes les tables de la base de données."""
+        """Crée toutes les tables de la base de données et l’admin par défaut."""
         with app.app_context():
-            # On importe les modèles ici pour être sûr qu'ils sont connus de SQLAlchemy
             from app.models.user import User
             from app.models.place import Place
             from app.models.review import Review
@@ -66,5 +73,21 @@ def create_app(config_class="app.config.DevelopmentConfig"):
             print("Création des tables...")
             db.create_all()
             print("Base de données initialisée avec succès.")
+
+            # Création de l’admin par défaut
+            if not User.query.filter_by(role='admin').first():
+                admin = User(
+                    username='boss',
+                    email='boss@hbnb.com',
+                    role='admin',
+                    first_name='Admin',
+                    last_name='User'
+                    )
+                admin.hash_password('Hbnb2025*-')
+                db.session.add(admin)
+                db.session.commit()
+                print("Admin par défaut créé.")
+            else:
+                print("Un admin existe déjà.")
 
     return app
