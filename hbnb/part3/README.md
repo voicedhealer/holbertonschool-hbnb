@@ -138,4 +138,6 @@ curl -H "Authorization: Bearer <votre_token>" \
  http://localhost:5000/api/v1/users/me
 
 ✍️ Auteurs :
-Anais Choisy, Vivien Bernardot, Patricia Bagashvili
+[Choisy Anaïs](https://github.com/o0anais0o)
+[Patricia Bagashvili](https://github.com/alizium)
+[Vivien Bernardot](https://github.com/voicedhealer)
