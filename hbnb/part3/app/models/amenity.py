@@ -1,29 +1,16 @@
-from .basemodel import BaseModel
 from app import db
 
-class Amenity(BaseModel):
-	def __init__(self, name):
-		super().__init__()	
-		self.name = name
+class Amenity(db.Model):
+    __tablename__ = 'amenities'
 
-	@property
-	def name(self):
-		return self.__name
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
 
-	@name.setter
-	def name(self, value):
-		if not isinstance(value, str):
-			raise TypeError("Name must be a string")
-		if not value:
-			raise ValueError("Name cannot be empty")
-		BaseModel.is_max_length(self, 'Name', value, 50)
-		self.__name = value
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name
+        }
 
-	def update(self, data):
-		return super().update(data)
-	
-	def to_dict(self):
-		return {
-			'id': self.id,
-			'name': self.name
-		}
+    def __repr__(self):
+        return f'<Amenity {self.name}>'
