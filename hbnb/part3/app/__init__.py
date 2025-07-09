@@ -67,22 +67,17 @@ def create_app(config_class="app.config.DevelopmentConfig"):
         """Crée toutes les tables de la base de données et l’admin par défaut."""
         with app.app_context():
             from app.models.user import User
-            from app.models.place import Place
-            from app.models.review import Review
-            from app.models.amenity import Amenity
-            print("Création des tables...")
             db.create_all()
-            print("Base de données initialisée avec succès.")
-
             # Création de l’admin par défaut
             if not User.query.filter_by(role='admin').first():
                 admin = User(
-                    username='boss',
-                    email='boss@hbnb.com',
-                    role='admin',
-                    first_name='Admin',
-                    last_name='User'
-                    )
+                username='admin',
+                email='admin@hbnb.com',
+                first_name='Admin',
+                last_name='User',
+                is_admin=True,
+                role='admin'
+            )
                 admin.hash_password('Hbnb2025*-')
                 db.session.add(admin)
                 db.session.commit()

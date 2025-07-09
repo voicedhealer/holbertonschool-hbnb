@@ -61,7 +61,8 @@ class User(UserMixin, BaseModel):
             'first_name': self.first_name,
             'last_name': self.last_name,
             'email': self.email,
-            'is_admin': self.is_admin
+            'is_admin': self.is_admin,
+            'role': self.role
         }
 
     def __repr__(self):

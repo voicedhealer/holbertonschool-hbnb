@@ -21,7 +21,7 @@ user_model = api.model('User', {
     'last_name': fields.String(required=True),
     'email': fields.String(required=True),
     'password': fields.String(required=True),
-    'is_admin': fields.Boolean(True)  # création d’un user admin via l’API
+    'is_admin': fields.Boolean(True)
 })
 
 @users_bp.route('/admin2', methods=['GET'])
@@ -146,7 +146,7 @@ class Login(Resource):
             return {"access_token": token}, 200
         return {"msg": "Mauvais identifiants"}, 401
 
-@api.route('/setup')
+'''@api.route('/setup')
 class Setup(Resource):
     def post(self):
         """Crée un compte admin SANS authentification (à supprimer après usage)"""
@@ -163,7 +163,7 @@ class Setup(Resource):
             return {"msg": "Admin déjà existant"}, 400
 
         new_user = facade.create_user(default_admin)
-        return {"msg": "Admin créé", "id": new_user.id}, 201
+        return {"msg": "Admin créé", "id": new_user.id}, 201'''
 
 # --- Endpoint bonus pour tester l'accès admin ---
 
