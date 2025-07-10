@@ -15,6 +15,12 @@ class User(UserMixin, BaseModel):
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
     role = db.Column(db.String(80), nullable=False, default='user')
 
+    def set_password(self, password):
+        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+    def check_password(self, password):
+        return bcrypt.check_password_hash(self.password, password)
+
     @property
     def first_name(self):
         return self._first_name
