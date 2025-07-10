@@ -1,67 +1,36 @@
-from .basemodel import BaseModel
-from flask_login import UserMixin
-from app import db, bcrypt
+import uuid
 import re
+from app.extensions import db
+from werkzeug.security import generate_password_hash, check_password_hash
+from app.models.base_model import BaseModel
 
-class User(UserMixin, BaseModel):
-    __tablename__ = 'app_users'
+class User(BaseModel, db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.String(60), primary_key=True, default=lambda: str(uuid.uuid4()))
+    first_name = db.Column(db.String(50), nullable=False)
+    last_name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128))
+    is_admin = db.Column(db.Boolean, default=False)
 
-    username = db.Column(db.String(80), unique=True, nullable=False, index=True)
-    password = db.Column(db.String(128), nullable=False)
-    _first_name = db.Column("first_name", db.String(50), nullable=False)
-    _last_name = db.Column("last_name", db.String(50), nullable=False)
-    _email = db.Column("email", db.String(120), unique=True, nullable=False)
-    is_admin = db.Column(db.Boolean, default=False, nullable=False)
+    places = db.relationship('Place', backref='owner', lazy=True)
+    reviews = db.relationship('Review', back_populates='user', cascade="all, delete-orphan")
 
-    @property
-    def first_name(self):
-        return self._first_name
+    EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
 
-    @first_name.setter
-    def first_name(self, value):
-        if not isinstance(value, str):
-            raise TypeError("First name must be a string")
-        self.is_max_length('First name', value, 50)
-        self._first_name = value
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
 
-    @property
-    def last_name(self):
-        return self._last_name
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
-    @last_name.setter
-    def last_name(self, value):
-        if not isinstance(value, str):
-            raise TypeError("Last name must be a string")
-        self.is_max_length('Last name', value, 50)
-        self._last_name = value
-
-    @property
-    def email(self):
-        return self._email
-
-    @email.setter
-    def email(self, value):
-        if not isinstance(value, str):
-            raise TypeError("Email must be a string")
-        if not re.match(r"[^@]+@[^@]+\.[^@]+", value):
-            raise ValueError("Invalid email format")
-        self._email = value
-
-    def hash_password(self, raw_password):
-        self.password = bcrypt.generate_password_hash(raw_password).decode('utf-8')
-
-    def verify_password(self, password):
-        return bcrypt.check_password_hash(self.password, password)
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'username': self.username,
-            'first_name': self.first_name,
-            'last_name': self.last_name,
-            'email': self.email,
-            'is_admin': self.is_admin
-        }
-
-    def __repr__(self):
-        return f'<User {self.username}>'
+    @staticmethod
+    def validate_data(data):
+        if not data.get('first_name') or len(data['first_name']) > 50:
+            raise ValueError("first_name is required and must be <= 50 chars")
+        if not data.get('last_name') or len(data['last_name']) > 50:
+            raise ValueError("last_name is required and must be <= 50 chars")
+        if not data.get('email') or not User.EMAIL_REGEX.match(data['email']):
+            raise ValueError("Valid email is required")
+        if not data.get('password') or len(data['password']) < 6:
+            raise ValueError("Password is required and must be >= 6 chars")

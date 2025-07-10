@@ -1,64 +1,33 @@
-from .basemodel import BaseModel
-from .place import Place
-from .user import User
-from app import db
+import uuid
+from app.extensions import db
+from app.models.base_model import BaseModel
 
-class Review(BaseModel):
-	def __init__(self, text, rating, place, user):
-		super().__init__()
-		self.text = text
-		self.rating = rating
-		self.place = place
-		self.user = user
-	
-	@property
-	def text(self):
-		return self.__text
-	
-	@text.setter
-	def text(self, value):
-		if not value:
-			raise ValueError("Text cannot be empty")
-		if not isinstance(value, str):
-			raise TypeError("Text must be a string")
-		self.__text = value
+class Review(BaseModel, db.Model):
+    __tablename__ = 'reviews'
+    id = db.Column(db.String(60), primary_key=True, default=lambda: str(uuid.uuid4()))
+    text = db.Column(db.Text, nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
+    place_id = db.Column(db.String(60), db.ForeignKey('places.id'), nullable=False)
+    user_id = db.Column(db.String(60), db.ForeignKey('users.id'), nullable=False)
 
-	@property
-	def rating(self):
-		return self.__rating
-	
-	@rating.setter
-	def rating(self, value):
-		if not isinstance(value, int):
-			raise TypeError("Rating must be an integer")
-		super().is_between('Rating', value, 1, 6)
-		self.__rating = value
+    # Relations (optionnelles, mais utiles pour navigation ORM)
+    place = db.relationship('Place', back_populates='reviews')
+    user = db.relationship('User', back_populates='reviews')
 
-	@property
-	def place(self):
-		return self.__place
-	
-	@place.setter
-	def place(self, value):
-		if not isinstance(value, Place):
-			raise TypeError("Place must be a place instance")
-		self.__place = value
+    @staticmethod
+    def validate_data(data):
+        if not data.get('text'):
+            raise ValueError("Review text is required")
+        if 'rating' not in data:
+            raise ValueError("Rating is required")
+        try:
+            rating = int(data['rating'])
+        except (ValueError, TypeError):
+            raise ValueError("Rating must be an integer")
+        if not (1 <= rating <= 5):
+            raise ValueError("Rating must be between 1 and 5")
+        if not data.get('place_id'):
+            raise ValueError("Place ID is required")
+        if not data.get('user_id'):
+            raise ValueError("User ID is required")
 
-	@property
-	def user(self):
-		return self.__user
-	
-	@user.setter
-	def user(self, value):
-		if not isinstance(value, User):
-			raise TypeError("User must be a user instance")
-		self.__user = value
-
-	def to_dict(self):
-		return {
-			'id': self.id,
-			'text': self.text,
-			'rating': self.rating,
-			'place_id': self.place.id,
-			'user_id': self.user.id
-		}

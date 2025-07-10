@@ -1,74 +1,60 @@
 from flask_restx import Namespace, Resource, fields
-from flask import request
-from app.services import facade
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.services.facade import HBnBFacade
+from flask_jwt_extended import jwt_required
 
 api = Namespace('amenities', description='Amenity operations')
 
-# Modèle pour la documentation et la validation
 amenity_model = api.model('Amenity', {
-    'name': fields.String(required=True, description='Nom de l\'équipement')
+    'name': fields.String(required=True)
 })
 
-# --- Endpoints réservés aux admins ---
+amenity_output_model = api.model('AmenityOut', {
+    'id': fields.String(),
+    'name': fields.String()
+})
 
-@api.route('/amenities/')
-class AmenityAdminCreate(Resource):
-    @api.expect(amenity_model)
+def amenity_to_dict(amenity):
+    return {
+        'id': amenity.id,
+        'name': amenity.name
+    }
+
+@api.route('/')
+class AmenityList(Resource):
+    @api.expect(amenity_model, validate=True)
+    @api.response(201, 'Amenity created')
+    @api.response(400, 'Invalid input')
     @jwt_required()
     def post(self):
-        """Créer un nouvel équipement (admin uniquement)"""
-        current_user = get_jwt_identity()
-        if not current_user.get('is_admin'):
-            return {'error': 'Admin privileges required'}, 403
-
-        amenity_data = api.payload or request.json
-        existing_amenity = facade.amenity_repo.get_by_attribute('name', amenity_data.get('name'))
-        if existing_amenity:
-            return {'error': 'Amenity already exists'}, 400
+        data = api.payload
         try:
-            new_amenity = facade.create_amenity(amenity_data)
-            return new_amenity.to_dict(), 201
+            amenity = HBnBFacade().create_amenity(data)
         except Exception as e:
             return {'error': str(e)}, 400
+        return amenity_to_dict(amenity), 201
 
-@api.route('/amenities/<amenity_id>')
-class AmenityAdminUpdate(Resource):
-    @api.expect(amenity_model)
+    @api.marshal_list_with(amenity_output_model)
+    def get(self):
+        amenities = HBnBFacade().get_all_amenities()
+        return [amenity_to_dict(a) for a in amenities], 200
+
+@api.route('/<amenity_id>')
+class AmenityResource(Resource):
+    @api.marshal_with(amenity_output_model)
+    def get(self, amenity_id):
+        amenity = HBnBFacade().get_amenity(amenity_id)
+        if not amenity:
+            return {'error': 'Amenity not found'}, 404
+        return amenity_to_dict(amenity), 200
+
+    @api.expect(amenity_model, validate=True)
     @jwt_required()
     def put(self, amenity_id):
-        """Modifier un équipement (admin uniquement)"""
-        current_user = get_jwt_identity()
-        if not current_user.get('is_admin'):
-            return {'error': 'Admin privileges required'}, 403
-
-        amenity_data = api.payload or request.json
-        amenity = facade.get_amenity(amenity_id)
-        if not amenity:
-            return {'error': 'Amenity not found'}, 404
+        data = api.payload
         try:
-            facade.update_amenity(amenity_id, amenity_data)
-            return {"message": "Amenity updated successfully"}, 200
+            amenity = HBnBFacade().update_amenity(amenity_id, data)
         except Exception as e:
             return {'error': str(e)}, 400
-
-# --- Endpoints publics (lecture seule) ---
-
-@api.route('/amenities/')
-class AmenityList(Resource):
-    @api.response(200, 'Liste des équipements récupérée avec succès')
-    def get(self):
-        """Récupérer la liste de tous les équipements (public)"""
-        amenities = facade.get_all_amenities()
-        return [amenity.to_dict() for amenity in amenities], 200
-
-@api.route('/amenities/<amenity_id>')
-class AmenityResource(Resource):
-    @api.response(200, 'Détails de l\'équipement récupérés avec succès')
-    @api.response(404, 'Équipement non trouvé')
-    def get(self, amenity_id):
-        """Obtenir les détails d'un équipement par son ID (public)"""
-        amenity = facade.get_amenity(amenity_id)
         if not amenity:
             return {'error': 'Amenity not found'}, 404
-        return amenity.to_dict(), 200
+        return amenity_to_dict(amenity), 200

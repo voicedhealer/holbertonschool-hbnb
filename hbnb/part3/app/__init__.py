@@ -1,70 +1,48 @@
-from flask import Flask
 from flask_restx import Api
-from flask_jwt_extended import JWTManager
-from flask_bcrypt import Bcrypt
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask
+from app.extensions import db, jwt
 
-db = SQLAlchemy()
-bcrypt = Bcrypt()
-jwt = JWTManager()
+def create_app(config_name='default'):
+    from config import config
 
-def create_app(config_class="app.config.DevelopmentConfig"):
-    """
-    Factory pour créer et configurer l'instance de l'application Flask.
-    """
     app = Flask(__name__)
-    app.config.from_object(config_class)
-    app.config["JWT_SECRET_KEY"] = "votre_cle_secrete"
-    
-    # 1. On initialise les extensions
-    db.init_app(app)
-    bcrypt.init_app(app)
-    jwt.init_app(app)
-    
-    # 2. On enregistre les blueprints ou les namespaces
-    from .api.v1.users import users_bp
-    from app.api.v1.users import users_bp
-    from app.api.v1.users import api as users_ns
-    from app.api.v1.amenities import api as amenities_ns
-    from app.api.v1.places import api as places_ns
-    from app.api.v1.reviews import api as reviews_ns
-    from app.api.v1.users import api as users_api
-    from app.api.v1.auth import api as auth_ns
+    app.config.from_object(config[config_name])
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hbnb.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    app.register_blueprint(users_bp, url_prefix='/api/v1/users')
+    db.init_app(app)
+    jwt.init_app(app)
 
     authorizations = {
-        'jwt': {
+        'Bearer Auth': {
             'type': 'apiKey',
             'in': 'header',
             'name': 'Authorization',
-            'description': "Entrez 'Bearer <token>' pour l'authentification. Exemple: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'"
+            'description': "JWT Authorization header using the Bearer scheme. Example: 'Authorization: Bearer {token}'"
         }
     }
 
-    api = Api(app, version='1.0', title='HBnB API', description='HBnB Application API',
-          authorizations=authorizations, security='jwt')
-    api.add_namespace(users_api, path='/api/v1/users')
-    
-    # Enregistrement des namespaces
-    # Le chemin est déjà dans le namespace, pas besoin de le redéfinir ici
+    api = Api(
+        app,
+        version='1.0',
+        title='HBNB API',
+        description='API HBNB',
+        doc='/api/v1/',
+        authorizations=authorizations,
+        security='Bearer Auth'
+    )
+
+    # Import et ajout des namespaces Flask-RESTX
+    from app.api.v1.users import api as users_ns
+    from app.api.v1.places import api as places_ns
+    from app.api.v1.amenities import api as amenities_ns
+    from app.api.v1.reviews import api as reviews_ns
+    from app.api.v1.auth import api as auth_ns
+
+    api.add_namespace(users_ns, path='/api/v1/users')
+    api.add_namespace(places_ns, path='/api/v1/places')
+    api.add_namespace(amenities_ns, path='/api/v1/amenities')
+    api.add_namespace(reviews_ns, path='/api/v1/reviews')
     api.add_namespace(auth_ns, path='/api/v1/auth')
-    api.add_namespace(users_ns)
-    api.add_namespace(amenities_ns)
-    api.add_namespace(places_ns)
-    api.add_namespace(reviews_ns)
-    # 3. On configure les routes de l'application
-    @app.cli.command("init-db")
-    def init_db_command():
-        """Crée toutes les tables de la base de données."""
-        with app.app_context():
-            # On importe les modèles ici pour être sûr qu'ils sont connus de SQLAlchemy
-            from app.models.user import User
-            from app.models.place import Place
-            from app.models.review import Review
-            from app.models.amenity import Amenity
-            print("Création des tables...")
-            db.create_all()
-            print("Base de données initialisée avec succès.")
 
     return app

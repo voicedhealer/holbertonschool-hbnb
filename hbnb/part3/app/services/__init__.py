@@ -1,3 +1,2 @@
-from .facade import HBnBFacade
-
-facade = HBnBFacade()
+# Permet l'import du package
+pass

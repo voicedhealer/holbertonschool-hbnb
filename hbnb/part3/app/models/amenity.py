@@ -1,29 +1,14 @@
-from .basemodel import BaseModel
-from app import db
+import uuid
+from app.extensions import db
+from app.models.base_model import BaseModel
 
-class Amenity(BaseModel):
-	def __init__(self, name):
-		super().__init__()	
-		self.name = name
+class Amenity(BaseModel, db.Model):
+    __tablename__ = 'amenities'
+    id = db.Column(db.String(60), primary_key=True, default=lambda: str(uuid.uuid4()))
+    name = db.Column(db.String(50), nullable=False, unique=True)
+    places = db.relationship('PlaceAmenity', back_populates='amenity', cascade="all, delete-orphan")
 
-	@property
-	def name(self):
-		return self.__name
-
-	@name.setter
-	def name(self, value):
-		if not isinstance(value, str):
-			raise TypeError("Name must be a string")
-		if not value:
-			raise ValueError("Name cannot be empty")
-		BaseModel.is_max_length(self, 'Name', value, 50)
-		self.__name = value
-
-	def update(self, data):
-		return super().update(data)
-	
-	def to_dict(self):
-		return {
-			'id': self.id,
-			'name': self.name
-		}
+    @staticmethod
+    def validate_data(data):
+        if not data.get('name') or len(data['name']) > 50:
+            raise ValueError("Amenity name is required and must be <= 50 chars")

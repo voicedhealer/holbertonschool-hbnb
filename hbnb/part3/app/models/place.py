@@ -1,108 +1,37 @@
-from .basemodel import BaseModel
-from .user import User
-from app import db
+import uuid
+from app.extensions import db
+from app.models.base_model import BaseModel
 
-class Place(BaseModel):
-    def __init__(self, title: str, price: float, latitude: str, longitude, owner, description=None):
-        super().__init__()
-        self.title = title
-        self.description = description
-        self.price = price
-        self.latitude = latitude
-        self.longitude = longitude
-        self.owner = owner
-        self.reviews = []
-        self.amenities = []
+class Place(BaseModel, db.Model):
+    __tablename__ = 'places'
+    id = db.Column(db.String(60), primary_key=True, default=lambda: str(uuid.uuid4()))
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    price = db.Column(db.Float, nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    owner_id = db.Column(db.String(60), db.ForeignKey('users.id'), nullable=False)
 
-    @property
-    def title(self):
-        return self.__title
-    
-    @title.setter
-    def title(self, value):
-        if not value:
-            raise ValueError("Title cannot be empty")
-        if not isinstance(value, str):
-            raise TypeError("Title must be a string")
-        BaseModel.is_max_length(self, 'title', value, 100)
-        self.__title = value
+    # Relations
+    reviews = db.relationship('Review', back_populates='place', cascade="all, delete-orphan")
+    amenities = db.relationship('PlaceAmenity', back_populates='place', cascade="all, delete-orphan")
 
-    @property
-    def price(self):
-        return self.__price
-    
-    @price.setter
-    def price(self, value):
-        if not isinstance(value, float) and not isinstance(value, int):
-            raise TypeError("Price must be a float")
-        if value < 0:
-            raise ValueError("Price must be positive.")
-        self.__price = value
+    @staticmethod
+    def validate_data(data):
+        if not data.get('title') or len(data['title']) > 100:
+            raise ValueError("Title is required and must be <= 100 chars")
+        if 'price' not in data or float(data['price']) <= 0:
+            raise ValueError("Price must be positive")
+        if 'latitude' not in data or not (-90.0 <= float(data['latitude']) <= 90.0):
+            raise ValueError("Latitude must be between -90.0 and 90.0")
+        if 'longitude' not in data or not (-180.0 <= float(data['longitude']) <= 180.0):
+            raise ValueError("Longitude must be between -180.0 and 180.0")
+        if not data.get('owner_id'):
+            raise ValueError("Owner (owner_id) is required")
 
-    @property
-    def latitude(self):
-        return self.__latitude
-    
-    @latitude.setter
-    def latitude(self, value):
-        if not isinstance(value, float):
-            raise TypeError("Latitude must be a float")
-        super().is_between("latitude", value, -90, 90)
-        self.__latitude = value
-    
-    @property
-    def longitude(self):
-        return self.__longitude
-    
-    @longitude.setter
-    def longitude(self, value):
-        if not isinstance(value, float):
-            raise TypeError("Longitude must be a float")
-        super().is_between("longitude", value, -180, 180)
-        self.__longitude = value
-
-    @property
-    def owner(self):
-        return self.__owner
-    
-    @owner.setter
-    def owner(self, value):
-        if not isinstance(value, User):
-            raise TypeError("Owner must be a user instance")
-        self.__owner = value
-
-    def add_review(self, review):
-        """Ajouter un avis sur le lieu"""
-        self.reviews.append(review)
-    
-    def delete_review(self, review):
-        """Ajouter un agrément au lieu"""
-        self.reviews.remove(review)
-
-    def add_amenity(self, amenity):
-        """Ajouter un agrément au lieu"""
-        self.amenities.append(amenity)
-
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'title': self.title,
-            'description': self.description,
-            'price': self.price,
-            'latitude': self.latitude,
-            'longitude': self.longitude,
-            'owner_id': self.owner.id
-        }
-    
-    def to_dict_list(self):
-        return {
-            'id': self.id,
-            'title': self.title,
-            'description': self.description,
-            'price': self.price,
-            'latitude': self.latitude,
-            'longitude': self.longitude,
-            'owner': self.owner.to_dict(),
-            'amenities': self.amenities,
-            'reviews': self.reviews
-        }
+class PlaceAmenity(db.Model):
+    __tablename__ = 'place_amenity'
+    place_id = db.Column(db.String(60), db.ForeignKey('places.id'), primary_key=True)
+    amenity_id = db.Column(db.String(60), db.ForeignKey('amenities.id'), primary_key=True)
+    place = db.relationship('Place', back_populates='amenities')
+    amenity = db.relationship('Amenity', back_populates='places')

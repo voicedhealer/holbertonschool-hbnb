@@ -1,81 +1,85 @@
 from flask_restx import Namespace, Resource, fields
-from app.services import facade
+from app.services.facade import HBnBFacade
+from flask_jwt_extended import jwt_required
 
 api = Namespace('reviews', description='Review operations')
 
-# Définir le modèle de révision pour la validation et la documentation des entrées
 review_model = api.model('Review', {
-    'text': fields.String(required=True, description='Text of the review'),
-    'rating': fields.Integer(required=True, description='Rating of the place (1-5)'),
-    'user_id': fields.String(required=True, description='ID of the user'),
-    'place_id': fields.String(required=True, description='ID of the place')
+    'text': fields.String(required=True),
+    'rating': fields.Integer(required=True),
+    'user_id': fields.String(required=True),
+    'place_id': fields.String(required=True)
 })
+
+review_output_model = api.model('ReviewOut', {
+    'id': fields.String(),
+    'text': fields.String(),
+    'rating': fields.Integer(),
+    'user_id': fields.String(),
+    'place_id': fields.String()
+})
+
+def review_to_dict(review):
+    return {
+        'id': review.id,
+        'text': review.text,
+        'rating': review.rating,
+        'user_id': review.user_id,
+        'place_id': review.place_id
+    }
 
 @api.route('/')
 class ReviewList(Resource):
-    @api.expect(review_model)
-    @api.response(201, 'Review successfully created')
-    @api.response(400, 'Invalid input data')
+    @api.expect(review_model, validate=True)
+    @api.response(201, 'Review created')
+    @api.response(400, 'Invalid input')
+    @jwt_required()
     def post(self):
-        """Enregistrer un nouvel avis"""
-        review_data = api.payload
-        place = facade.get_place(review_data['place_id'])
-        if not place:
-            return {'error': 'Place not found'}, 400
-        user = facade.get_user(review_data['user_id'])
-        if not user:
-            return {'error': 'User not found'}, 400
-        if place.owner.id == user.id:
-            return {'error': 'User cannot review their own place'}, 400
+        data = api.payload
         try:
-            new_review = facade.create_review(review_data)
-            return new_review.to_dict(), 201
+            review = HBnBFacade().create_review(data)
         except Exception as e:
             return {'error': str(e)}, 400
+        return review_to_dict(review), 201
 
-    @api.response(200, 'List of reviews retrieved successfully')
+    @api.marshal_list_with(review_output_model)
     def get(self):
-        """Récupérer une liste de tous les avis"""
-        return [review.to_dict() for review in facade.get_all_reviews()], 200
+        reviews = HBnBFacade().get_all_reviews()
+        return [review_to_dict(r) for r in reviews], 200
 
 @api.route('/<review_id>')
 class ReviewResource(Resource):
-    @api.response(200, 'Review details retrieved successfully')
-    @api.response(404, 'Review not found')
+    @api.marshal_with(review_output_model)
     def get(self, review_id):
-        """Obtenir les détails de l'avis par identifiant"""
-        review = facade.get_review(review_id)
+        review = HBnBFacade().get_review(review_id)
         if not review:
             return {'error': 'Review not found'}, 404
-        return review.to_dict(), 200
+        return review_to_dict(review), 200
 
-    @api.expect(review_model)
-    @api.response(200, 'Review updated successfully')
-    @api.response(404, 'Review not found')
-    @api.response(400, 'Invalid input data')
+    @api.expect(review_model, validate=True)
+    @jwt_required()
     def put(self, review_id):
-        """Mettre à jour les informations d'un avis"""
-        review_data = api.payload
-        review = facade.get_review(review_id)
-        if not review:
-            return {'error': 'Review not found'}, 404
-        
+        data = api.payload
         try:
-            facade.update_review(review_id, review_data)
-            return {'message': 'Review updated successfully'}, 200
+            review = HBnBFacade().update_review(review_id, data)
         except Exception as e:
             return {'error': str(e)}, 400
+        if not review:
+            return {'error': 'Review not found'}, 404
+        return review_to_dict(review), 200
 
-    @api.response(200, 'Review deleted successfully')
-    @api.response(404, 'Review not found')
+    @jwt_required()
     def delete(self, review_id):
-        """Supprimer un avis"""
-        review = facade.get_review(review_id)
-        if not review:
+        deleted = HBnBFacade().delete_review(review_id)
+        if not deleted:
             return {'error': 'Review not found'}, 404
-        
-        try:
-            facade.delete_review(review_id)
-            return {'message': 'Review deleted successfully'}, 200
-        except Exception as e:
-            return {'error': str(e)}, 400
+        return {'message': 'Review deleted successfully'}, 200
+
+@api.route('/places/<place_id>/reviews')
+class PlaceReviewList(Resource):
+    @api.marshal_list_with(review_output_model)
+    def get(self, place_id):
+        reviews = HBnBFacade().get_reviews_by_place(place_id)
+        if reviews is None:
+            return {'error': 'Place not found'}, 404
+        return [review_to_dict(r) for r in reviews], 200

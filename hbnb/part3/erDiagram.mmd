@@ -1,44 +1,49 @@
 erDiagram
-
     USER {
-        string id
+        string id PK
         string first_name
         string last_name
         string email
         string password
         boolean is_admin
     }
-
     PLACE {
-        string id
+        string id PK
         string title
         string description
         float price
         float latitude
         float longitude
-        string owner_id
+        string user_id FK
     }
-
     REVIEW {
-        string id
+        string id PK
         string text
         int rating
-        string user_id
-        string place_id
+        string user_id FK
+        string place_id FK
     }
-
     AMENITY {
-        string id
+        string id PK
         string name
     }
-
     PLACE_AMENITY {
-        string place_id
-        string amenity_id
+        string place_id PK, FK
+        string amenity_id PK, FK
     }
 
-    USER ||--o{ PLACE : owns
-    USER ||--o{ REVIEW : writes
-    PLACE ||--o{ REVIEW : has
-    PLACE ||--o{ PLACE_AMENITY : includes
-    AMENITY ||--o{ PLACE_AMENITY : linked_to
+    USER ||--o{ PLACE : "owns"
+    USER ||--o{ REVIEW : "writes"
+    PLACE ||--o{ REVIEW : "has"
+    PLACE ||--o{ PLACE_AMENITY : "includes"
+    AMENITY ||--o{ PLACE_AMENITY : "linked_to"
+    PLACE_AMENITY }o--|| PLACE : "for place"
+    PLACE_AMENITY }o--|| AMENITY : "for amenity"
+
+%% PK = Primary Key (clé primaire) : C’est la colonne (ou l’ensemble de colonnes) qui identifie de façon unique chaque ligne d’une table.
+%% Exemple : id est souvent la clé primaire d’une table.
+%% Analogie : identifiant unique (comme ta carte d’identité)
+
+%% FK = Foreign Key (clé étrangère) : C’est une colonne qui référence la clé primaire d’une autre table. Elle sert à établir une relation entre deux tables.
+%% Exemple : user_id dans la table places est une clé étrangère qui référence id dans la table users.
+%% Analogie : lien vers un autre identifiant (comme le numéro de la carte d’identité de ton parent sur ta fiche)
