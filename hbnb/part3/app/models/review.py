@@ -30,4 +30,3 @@ class Review(BaseModel, db.Model):
             raise ValueError("Place ID is required")
         if not data.get('user_id'):
             raise ValueError("User ID is required")
-
