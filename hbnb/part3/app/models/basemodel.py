@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime, timezone
 
 class BaseModel(db.Model):
-    __abstract__ = True  # Très important : cette classe ne crée pas de table seule
+    __abstract__ = True
 
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()), nullable=False)
     created_at = db.Column(

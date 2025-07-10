@@ -6,6 +6,7 @@ import re
 class User(UserMixin, BaseModel):
     __tablename__ = 'app_users'
 
+    id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False, index=True)
     password = db.Column(db.String(128), nullable=False)
     _first_name = db.Column("first_name", db.String(50), nullable=False)
