@@ -122,7 +122,7 @@ Les entités principales sont :
 
 ## 🚀 Lancer l’application
 
-```bash
+```
 # 1. Installer les dépendances
 pip install -r requirements.txt
 
@@ -153,8 +153,9 @@ curl -X POST http://localhost:5000/api/v1/auth/login \
 # Accès protégé
 curl -H "Authorization: Bearer <votre_token>" \
  http://localhost:5000/api/v1/users/me
+```
 
-✍️ Auteurs :
+## ✍️ Auteurs :
 [Choisy Anaïs](https://github.com/o0anais0o)
 [Patricia Bagashvili](https://github.com/alizium)
 [Vivien Bernardot](https://github.com/voicedhealer)
