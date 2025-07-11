@@ -86,6 +86,7 @@ hbnb/
 - **Flask-Bcrypt**
 - **Flask-JWT-Extended**
 - **Flask-SQLAlchemy**
+- **Werkzeug**
 - **Mermaid.js** (pour les ER diagrams)
 - **cURL / Postman** (pour tester l’API)
 
@@ -131,7 +132,7 @@ flask shell
 >>> db.create_all()
 
 # 3. Lancer le serveur
-flask run
+python3 run.py
 
 📬 Points de terminaison API (exemples)
 POST /api/v1/users/ : Créer un utilisateur
