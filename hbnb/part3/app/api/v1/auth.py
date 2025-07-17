@@ -1,5 +1,5 @@
 from flask_restx import Namespace, Resource, fields
-from app.services.auth import login_user  # ← appel au service
+from app.services.auth import login_user
 from flask_jwt_extended import create_access_token
 from app.services.facade import HBnBFacade
 

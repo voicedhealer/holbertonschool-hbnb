@@ -1,4 +1,6 @@
-#!/home/choisy/holbertonschool-hbnbV2Test/hbnb/part3/venv/bin/python3
+#!/bin/sh
+'''exec' "/Users/vivien/holberton school/holbertonschool-hbnb/hbnb/part3/venv/bin/python3.13" "$0" "$@"
+' '''
 # -*- coding: utf-8 -*-
 import re
 import sys

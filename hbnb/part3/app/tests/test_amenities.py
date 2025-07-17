@@ -3,7 +3,7 @@ from app import create_app, db
 
 @pytest.fixture
 def client():
-    app = create_app('testing')  # Assure-toi d'avoir une config 'testing'
+    app = create_app('testing')
     app.config['TESTING'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     with app.test_client() as client:
@@ -14,10 +14,10 @@ def client():
             db.drop_all()
 
 def test_create_amenity(client):
-    # Suppose que l’auth n’est pas obligatoire pour GET
-    response = client.post('/api/v1/amenities/', json={'name': 'Wifi'})
-    assert response.status_code == 401  # JWT requis
-
+    data = {"name": "Piscine_unique_123"}
+    response = client.post("/api/v1/amenities/", json=data)
+    assert response.status_code == 201
+    
 def test_get_amenities(client):
     # Ajoute une amenity pour le test
     from app.models.amenity import Amenity
