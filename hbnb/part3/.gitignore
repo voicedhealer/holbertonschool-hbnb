@@ -1,6 +1,49 @@
-*main.py
-*venv
-__pycache__
-testss
-test_api.py
-test_facade.py
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.env/
+.venv/
+env/
+ENV/
+
+# Environments and secrets
+*.env
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Test output
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+
+# Database files
+*.sqlite
+*.db
+
+# Logs
+*.log
+
+# Misc
+.DS_Store
+
+# Autres fichiers spécifiques au projet
+test*
+main.py
