@@ -123,15 +123,21 @@ Les entités principales sont :
 ## 🚀 Lancer l’application
 
 ```
-# 1. Installer les dépendances
+# 1. Créer l'environnement virtuel
+python3 -m venv venv
+
+# 2. Activer l'environnement virtuel
+source venv/bin/activate
+
+# 3. Installer les dépendances
 pip install -r requirements.txt
 
-# 2. Lancer un shell Flask pour initier la base
+# 4. Lancer un shell Flask pour initier la base
 flask shell
 >>> from app import db
 >>> db.create_all()
 
-# 3. Lancer le serveur
+# 5. Lancer le serveur
 python3 run.py
 
 📬 Points de terminaison API (exemples)
