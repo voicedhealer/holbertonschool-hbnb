@@ -1,6 +1,6 @@
 from flask_restx import Namespace, Resource, fields
 from app.services.facade import HBnBFacade
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt
 
 api = Namespace('places', description='Place operations')
 
@@ -40,7 +40,7 @@ place_output_model = api.model('PlaceOut', {
     'price': fields.Float(),
     'latitude': fields.Float(),
     'longitude': fields.Float(),
-    'owner_id': fields.String(),  # <-- Ajout explicite pour les tests
+    'owner_id': fields.String(),
     'owner': fields.Nested(user_model),
     'amenities': fields.List(fields.Nested(amenity_model)),
     'reviews': fields.List(fields.Nested(review_model))
@@ -54,10 +54,9 @@ def place_to_dict(place, details=True):
         'price': place.price,
         'latitude': place.latitude,
         'longitude': place.longitude,
-        'owner_id': str(place.owner_id),  # <-- Ajout explicite pour les tests
+        'owner_id': str(place.owner_id),
     }
     if details:
-        # Owner (si chargé)
         if hasattr(place, 'owner') and place.owner:
             data['owner'] = {
                 'id': str(place.owner.id),
@@ -67,7 +66,6 @@ def place_to_dict(place, details=True):
             }
         else:
             data['owner'] = None
-        # Amenities (via table d'association)
         if hasattr(place, 'amenities'):
             data['amenities'] = [
                 {'id': str(pa.amenity.id), 'name': pa.amenity.name}
@@ -76,7 +74,6 @@ def place_to_dict(place, details=True):
             ]
         else:
             data['amenities'] = []
-        # Reviews
         if hasattr(place, 'reviews'):
             data['reviews'] = [
                 {
@@ -95,15 +92,23 @@ def place_to_dict(place, details=True):
 class PlaceList(Resource):
     @api.expect(place_model, validate=True)
     @api.response(201, 'Place created')
-    @api.response(400, 'Invalid input')
+    @api.response(400, 'Invalid input or duplicate location')
     @jwt_required()
     def post(self):
         data = api.payload
+
+        # Vérification unicité géolocalisation
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+
+        existing_place = HBnBFacade().find_place_by_location(latitude, longitude)
+        if existing_place:
+            return {'error': 'A place already exists at this location'}, 400
+
         try:
             place = HBnBFacade().create_place(data)
         except Exception as e:
             return {'error': str(e)}, 400
-        # Retourne tous les champs attendus par les tests
         return place_to_dict(place, details=False), 201
 
     @api.marshal_list_with(place_output_model)
@@ -123,11 +128,33 @@ class PlaceResource(Resource):
     @api.expect(place_model, validate=True)
     @jwt_required()
     def put(self, place_id):
-        data = api.payload
-        try:
-            place = HBnBFacade().update_place(place_id, data)
-        except Exception as e:
-            return {'error': str(e)}, 400
+        claims = get_jwt()
+        user_id = claims.get('sub')
+        is_admin = claims.get('is_admin', False)
+
+        place = HBnBFacade().get_place(place_id)
         if not place:
             return {'error': 'Place not found'}, 404
-        return place_to_dict(place), 200
+
+        # Vérification des droits : admin ou owner uniquement
+        if not (is_admin or str(place.owner_id) == user_id):
+            return {'error': 'Permission denied'}, 403
+
+        data = api.payload
+
+        # Optionnel : éviter de modifier la géolocalisation vers un lieu déjà existant
+        new_lat = data.get('latitude', place.latitude)
+        new_lon = data.get('longitude', place.longitude)
+        if (new_lat != place.latitude or new_lon != place.longitude):
+            exist = HBnBFacade().find_place_by_location(new_lat, new_lon)
+            if exist and exist.id != place.id:
+                return {'error': 'Another place already exists at the new location'}, 400
+
+        try:
+            updated_place = HBnBFacade().update_place(place_id, data)
+        except Exception as e:
+            return {'error': str(e)}, 400
+
+        if not updated_place:
+            return {'error': 'Place not found'}, 404
+        return place_to_dict(updated_place), 200

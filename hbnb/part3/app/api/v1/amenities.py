@@ -1,6 +1,6 @@
 from flask_restx import Namespace, Resource, fields
 from app.services.facade import HBnBFacade
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt
 
 api = Namespace('amenities', description='Amenity operations')
 
@@ -15,7 +15,7 @@ amenity_output_model = api.model('AmenityOut', {
 
 def amenity_to_dict(amenity):
     return {
-        'id': amenity.id,
+        'id': str(amenity.id),
         'name': amenity.name
     }
 
@@ -24,8 +24,12 @@ class AmenityList(Resource):
     @api.expect(amenity_model, validate=True)
     @api.response(201, 'Amenity created')
     @api.response(400, 'Invalid input')
+    @api.response(403, 'Admin only')
     @jwt_required()
     def post(self):
+        claims = get_jwt()
+        if not claims.get('is_admin'):
+            api.abort(403, "Admin only")
         data = api.payload
         try:
             amenity = HBnBFacade().create_amenity(data)
@@ -48,8 +52,12 @@ class AmenityResource(Resource):
         return amenity_to_dict(amenity), 200
 
     @api.expect(amenity_model, validate=True)
+    @api.response(403, 'Admin only')
     @jwt_required()
     def put(self, amenity_id):
+        claims = get_jwt()
+        if not claims.get('is_admin'):
+            api.abort(403, "Admin only")
         data = api.payload
         try:
             amenity = HBnBFacade().update_amenity(amenity_id, data)

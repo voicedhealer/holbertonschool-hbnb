@@ -1,8 +1,11 @@
+import re
 from flask_restx import Namespace, Resource, fields
 from app.services.facade import HBnBFacade
 from flask_jwt_extended import jwt_required, get_jwt
 
 api = Namespace('users', description='User operations')
+
+EMAIL_REGEX = re.compile(r"[^@]+@[^@]+\.[^@]+")
 
 user_input_model = api.model('UserInput', {
     'first_name': fields.String(required=True),
@@ -43,8 +46,13 @@ class UserList(Resource):
     @api.expect(user_input_model, validate=True)
     @api.response(201, 'User created', user_output_model)
     @api.response(400, 'Invalid input')
+    @api.response(403, 'Admin only')
+    @jwt_required()
     def post(self):
-        """Create a new user"""
+        """Create a new user (admin only)"""
+        claims = get_jwt()
+        if not claims.get('is_admin'):
+            api.abort(403, 'Admin only')
         data = api.payload
         try:
             user = HBnBFacade().create_user(data)
@@ -71,7 +79,21 @@ class UserResource(Resource):
     @jwt_required()
     def put(self, user_id):
         """Update a user"""
+        claims = get_jwt()
+        current_user_id = claims.get('sub')
+        is_admin = claims.get('is_admin', False)
+
+        # Check authorization: only admin or owner can update
+        if not (is_admin or current_user_id == user_id):
+            api.abort(403, "Permission denied")
+
         data = api.payload
+
+        # Email validation
+        email = data.get('email')
+        if email and not EMAIL_REGEX.match(email):
+            api.abort(400, "Invalid email format")
+
         try:
             user = HBnBFacade().update_user(user_id, data)
             if not user:

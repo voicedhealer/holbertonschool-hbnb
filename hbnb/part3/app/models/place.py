@@ -4,6 +4,7 @@ from app.models.base_model import BaseModel
 
 class Place(BaseModel, db.Model):
     __tablename__ = 'places'
+
     id = db.Column(db.String(60), primary_key=True, default=lambda: str(uuid.uuid4()))
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=True)
@@ -13,8 +14,19 @@ class Place(BaseModel, db.Model):
     owner_id = db.Column(db.String(60), db.ForeignKey('users.id'), nullable=False)
 
     # Relations
-    reviews = db.relationship('Review', back_populates='place', cascade="all, delete-orphan")
-    amenities = db.relationship('PlaceAmenity', back_populates='place', cascade="all, delete-orphan")
+    reviews = db.relationship(
+        'Review',
+        back_populates='place',
+        cascade="all, delete-orphan",
+        lazy="select"
+    )
+
+    amenities = db.relationship(
+        'PlaceAmenity',
+        back_populates='place',
+        cascade="all, delete-orphan",
+        lazy="select"
+    )
 
     @staticmethod
     def validate_data(data):
@@ -29,9 +41,14 @@ class Place(BaseModel, db.Model):
         if not data.get('owner_id'):
             raise ValueError("Owner (owner_id) is required")
 
+    def __repr__(self):
+        return f"<Place {self.title} - {self.latitude}, {self.longitude}>"
+
 class PlaceAmenity(db.Model):
     __tablename__ = 'place_amenity'
+
     place_id = db.Column(db.String(60), db.ForeignKey('places.id'), primary_key=True)
     amenity_id = db.Column(db.String(60), db.ForeignKey('amenities.id'), primary_key=True)
+
     place = db.relationship('Place', back_populates='amenities')
     amenity = db.relationship('Amenity', back_populates='places')

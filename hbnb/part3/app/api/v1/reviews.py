@@ -1,6 +1,6 @@
 from flask_restx import Namespace, Resource, fields
 from app.services.facade import HBnBFacade
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt
 
 api = Namespace('reviews', description='Review operations')
 
@@ -21,11 +21,11 @@ review_output_model = api.model('ReviewOut', {
 
 def review_to_dict(review):
     return {
-        'id': review.id,
+        'id': str(review.id),
         'text': review.text,
         'rating': review.rating,
-        'user_id': review.user_id,
-        'place_id': review.place_id
+        'user_id': str(review.user_id),
+        'place_id': str(review.place_id)
     }
 
 @api.route('/')
@@ -57,19 +57,37 @@ class ReviewResource(Resource):
         return review_to_dict(review), 200
 
     @api.expect(review_model, validate=True)
+    @api.response(403, "Permission denied")
     @jwt_required()
     def put(self, review_id):
-        data = api.payload
-        try:
-            review = HBnBFacade().update_review(review_id, data)
-        except Exception as e:
-            return {'error': str(e)}, 400
+        claims = get_jwt()
+        current_user_id = claims.get('sub')
+        is_admin = claims.get('is_admin', False)
+        review = HBnBFacade().get_review(review_id)
         if not review:
             return {'error': 'Review not found'}, 404
-        return review_to_dict(review), 200
+        if not (is_admin or str(review.user_id) == current_user_id):
+            return {'error': 'Permission denied'}, 403
+        data = api.payload
+        try:
+            updated = HBnBFacade().update_review(review_id, data)
+        except Exception as e:
+            return {'error': str(e)}, 400
+        if not updated:
+            return {'error': 'Review not found'}, 404
+        return review_to_dict(updated), 200
 
+    @api.response(403, "Permission denied")
     @jwt_required()
     def delete(self, review_id):
+        claims = get_jwt()
+        current_user_id = claims.get('sub')
+        is_admin = claims.get('is_admin', False)
+        review = HBnBFacade().get_review(review_id)
+        if not review:
+            return {'error': 'Review not found'}, 404
+        if not (is_admin or str(review.user_id) == current_user_id):
+            return {'error': 'Permission denied'}, 403
         deleted = HBnBFacade().delete_review(review_id)
         if not deleted:
             return {'error': 'Review not found'}, 404

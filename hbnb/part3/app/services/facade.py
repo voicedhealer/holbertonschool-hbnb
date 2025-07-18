@@ -1,8 +1,4 @@
 from app.extensions import db
-from app.repositories.user_repository import UserRepository
-from app.repositories.place_repository import PlaceRepository
-from app.repositories.amenity_repository import AmenityRepository
-from app.repositories.review_repository import ReviewRepository
 from app.models.user import User
 from app.models.place import Place, PlaceAmenity
 from app.models.amenity import Amenity
@@ -10,21 +6,20 @@ from app.models.review import Review
 from werkzeug.security import generate_password_hash
 
 class HBnBFacade:
+
     # ---------- USER ----------
     def create_user(self, data):
-        if hasattr(User, "validate_data"):
-            User.validate_data(data)
+        # Validation métier complète AVANT toute opération
+        User.validate_data(data)
         if User.query.filter_by(email=data['email']).first():
             raise ValueError("Email already registered")
+
         user = User(
             first_name=data['first_name'],
             last_name=data['last_name'],
             email=data['email']
         )
-        if hasattr(user, "set_password"):
-            user.set_password(data['password'])
-        else:
-            user.password_hash = generate_password_hash(data['password'])
+        user.set_password(data['password'])
         db.session.add(user)
         db.session.commit()
         return user
@@ -51,17 +46,15 @@ class HBnBFacade:
         if 'last_name' in data:
             user.last_name = data['last_name']
         if 'password' in data:
-            if hasattr(user, "set_password"):
-                user.set_password(data['password'])
-            else:
-                user.password_hash = generate_password_hash(data['password'])
+            user.set_password(data['password'])
         db.session.commit()
         return user
 
     # ---------- AMENITY ----------
     def create_amenity(self, data):
-        if not data.get('name') or len(data['name']) > 50:
-            raise ValueError("Amenity name is required and must be <= 50 chars")
+        Amenity.validate_data(data)
+        if Amenity.query.filter_by(name=data['name']).first():
+            raise ValueError("Amenity name must be unique")
         amenity = Amenity(name=data['name'])
         db.session.add(amenity)
         db.session.commit()
@@ -80,12 +73,17 @@ class HBnBFacade:
         if 'name' in data:
             if not data['name'] or len(data['name']) > 50:
                 raise ValueError("Amenity name is required and must be <= 50 chars")
+            # unicité du nom si modif
+            existing = Amenity.query.filter_by(name=data['name']).first()
+            if existing and existing.id != amenity_id:
+                raise ValueError("Amenity name must be unique")
             amenity.name = data['name']
         db.session.commit()
         return amenity
 
     # ---------- PLACE ----------
     def create_place(self, data):
+        Place.validate_data(data)
         owner = db.session.get(User, data['owner_id'])
         if not owner:
             raise ValueError("Owner not found")
@@ -95,13 +93,14 @@ class HBnBFacade:
             if not amenity:
                 raise ValueError(f"Amenity not found: {amenity_id}")
             amenities.append(amenity)
+        # Nouvelle place
         place = Place(
             title=data['title'],
             description=data.get('description', ''),
             price=data['price'],
             latitude=data['latitude'],
             longitude=data['longitude'],
-            owner=owner
+            owner_id=owner.id
         )
         db.session.add(place)
         db.session.flush()  # Pour obtenir l'ID du place
@@ -142,24 +141,30 @@ class HBnBFacade:
         db.session.commit()
         return place
 
+    def find_place_by_location(self, latitude, longitude, delta=1e-7):
+        """
+        Retourne une place si une autre existe déjà à une latitude/longitude proche.
+        delta : précision de la comparaison (utile pour éviter les problèmes de flottants)
+        """
+        return Place.query.filter(
+            db.func.abs(Place.latitude - latitude) < delta,
+            db.func.abs(Place.longitude - longitude) < delta
+        ).first()
+
     # ---------- REVIEW ----------
     def create_review(self, data):
-        user_id = data['user_id']
-        place_id = data['place_id']
-        user = db.session.get(User, user_id)
-        place = db.session.get(Place, place_id)
+        Review.validate_data(data)
+        user = db.session.get(User, data['user_id'])
+        place = db.session.get(Place, data['place_id'])
         if not user:
             raise ValueError("User not found")
         if not place:
             raise ValueError("Place not found")
-        rating = data['rating']
-        if not (1 <= int(rating) <= 5):
-            raise ValueError("Rating must be between 1 and 5")
         review = Review(
             text=data['text'],
-            rating=rating,
-            place=place,
-            user=user
+            rating=int(data['rating']),
+            user_id=user.id,
+            place_id=place.id
         )
         db.session.add(review)
         db.session.commit()
@@ -175,7 +180,7 @@ class HBnBFacade:
         place = db.session.get(Place, place_id)
         if not place:
             return None
-        return place.reviews
+        return list(place.reviews)
 
     def update_review(self, review_id, data):
         review = self.get_review(review_id)
@@ -190,11 +195,3 @@ class HBnBFacade:
             review.rating = int(rating)
         db.session.commit()
         return review
-
-    def delete_review(self, review_id):
-        review = self.get_review(review_id)
-        if not review:
-            return False
-        db.session.delete(review)
-        db.session.commit()
-        return True

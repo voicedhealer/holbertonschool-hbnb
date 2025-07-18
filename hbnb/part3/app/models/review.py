@@ -4,15 +4,20 @@ from app.models.base_model import BaseModel
 
 class Review(BaseModel, db.Model):
     __tablename__ = 'reviews'
-    id = db.Column(db.String(60), primary_key=True, default=lambda: str(uuid.uuid4()))
+
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     text = db.Column(db.Text, nullable=False)
     rating = db.Column(db.Integer, nullable=False)
-    place_id = db.Column(db.String(60), db.ForeignKey('places.id'), nullable=False)
-    user_id = db.Column(db.String(60), db.ForeignKey('users.id'), nullable=False)
+    place_id = db.Column(db.String(36), db.ForeignKey('places.id'), nullable=False)
+    user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
 
-    # Relations (optionnelles, mais utiles pour navigation ORM)
-    place = db.relationship('Place', back_populates='reviews')
-    user = db.relationship('User', back_populates='reviews')
+    # Relations
+    place = db.relationship('Place', back_populates='reviews', lazy="select")
+    user = db.relationship('User', back_populates='reviews', lazy="select")
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        Review.validate_data(kwargs)
 
     @staticmethod
     def validate_data(data):
@@ -28,5 +33,3 @@ class Review(BaseModel, db.Model):
             raise ValueError("Rating must be between 1 and 5")
         if not data.get('place_id'):
             raise ValueError("Place ID is required")
-        if not data.get('user_id'):
-            raise ValueError("User ID is required")
