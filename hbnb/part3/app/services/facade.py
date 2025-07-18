@@ -9,11 +9,9 @@ class HBnBFacade:
 
     # ---------- USER ----------
     def create_user(self, data):
-        # Validation métier complète AVANT toute opération
         User.validate_data(data)
         if User.query.filter_by(email=data['email']).first():
             raise ValueError("Email already registered")
-
         user = User(
             first_name=data['first_name'],
             last_name=data['last_name'],
@@ -73,7 +71,6 @@ class HBnBFacade:
         if 'name' in data:
             if not data['name'] or len(data['name']) > 50:
                 raise ValueError("Amenity name is required and must be <= 50 chars")
-            # unicité du nom si modif
             existing = Amenity.query.filter_by(name=data['name']).first()
             if existing and existing.id != amenity_id:
                 raise ValueError("Amenity name must be unique")
@@ -88,12 +85,14 @@ class HBnBFacade:
         if not owner:
             raise ValueError("Owner not found")
         amenities = []
+        # Correction : validation stricte de la liste des amenities
         for amenity_id in data.get('amenities', []):
+            if not amenity_id:
+                raise ValueError("Amenity ID cannot be empty")
             amenity = db.session.get(Amenity, amenity_id)
             if not amenity:
                 raise ValueError(f"Amenity not found: {amenity_id}")
             amenities.append(amenity)
-        # Nouvelle place
         place = Place(
             title=data['title'],
             description=data.get('description', ''),
@@ -132,7 +131,10 @@ class HBnBFacade:
             place.owner_id = owner.id
         if 'amenities' in data:
             PlaceAmenity.query.filter_by(place_id=place.id).delete()
+            # Correction : validation stricte également ici
             for amenity_id in data['amenities']:
+                if not amenity_id:
+                    raise ValueError("Amenity ID cannot be empty")
                 amenity = db.session.get(Amenity, amenity_id)
                 if not amenity:
                     raise ValueError(f"Amenity not found: {amenity_id}")
@@ -142,10 +144,6 @@ class HBnBFacade:
         return place
 
     def find_place_by_location(self, latitude, longitude, delta=1e-7):
-        """
-        Retourne une place si une autre existe déjà à une latitude/longitude proche.
-        delta : précision de la comparaison (utile pour éviter les problèmes de flottants)
-        """
         return Place.query.filter(
             db.func.abs(Place.latitude - latitude) < delta,
             db.func.abs(Place.longitude - longitude) < delta
