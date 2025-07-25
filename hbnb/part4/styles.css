@@ -1,0 +1,241 @@
+/* Reset global */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+/* Variables CSS de la palette */
+:root {
+  --primary-color: #123456;      /* bleu foncé */
+  --secondary-color: #abcdef;    /* bleu clair */
+  --header-bg-color: #333;
+  --header-text-color: #fff;
+  --link-color: #fff;
+  --button-bg-color: #f44336;
+  --button-hover-bg-color: #d32f2f;
+  --button-text-color: #fff;
+  --footer-bg-color: #222;
+  --footer-text-color: #ccc;
+  --card-bg-color: #fff;
+  --card-border-color: #ddd;
+}
+
+/* Body */
+body {
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* Header */
+header {
+  background-color: var(--header-bg-color);
+  color: var(--header-text-color);
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  height: 50px;
+}
+
+/* Navbar */
+nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+nav h1 {
+  font-size: 1.5rem;
+  margin-right: 2rem;
+  color: var(--header-text-color);
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+}
+
+nav ul li {
+  color: var(--header-text-color);
+  display: flex;
+  align-items: center;
+}
+
+nav ul li a,
+nav a {
+  color: var(--link-color);
+  text-decoration: none;
+  padding: 0.3rem 0.5rem;
+  transition: background-color 0.3s;
+}
+
+nav ul li a:hover,
+nav a:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+/* User info text */
+#user-info {
+  font-weight: bold;
+  color: var(--header-text-color);
+  white-space: nowrap;
+}
+
+/* Logout button */
+#logout-button {
+  cursor: pointer;
+  padding: 0.3rem 0.6rem;
+  border: none;
+  background-color: var(--button-bg-color);
+  color: var(--button-text-color);
+  border-radius: 4px;
+  font-size: 0.9rem;
+  display: none; /* hidden by default */
+  transition: background-color 0.3s;
+}
+
+#logout-button:hover {
+  background-color: var(--button-hover-bg-color);
+}
+
+/* Lien retour joli, lisible et placé */
+.back-to-home {
+  display: inline-block;
+  margin: 2rem auto;
+  color: #fff;              /* blanc ou une couleur vive, selon ton thème */
+  background: #1976D2;      /* bleu contrastant, ou celle de ta palette */
+  border-radius: 5px;
+  padding: 0.5rem 1.2rem;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  text-align: center;
+  transition: background 0.2s;
+}
+
+.back-to-home:hover,
+.back-to-home:focus {
+  background: #09569b;   /* couleur plus foncée au survol */
+  color: #fff;
+  text-decoration: underline;
+}
+
+
+/* Main content */
+main {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Filters Section */
+.filters-section label {
+  display: inline-block;
+  margin: 0.5rem 0 0.2rem 0;
+  font-weight: bold;
+  color: var(--secondary-color);
+}
+
+.filters-section select {
+  margin-right: 1rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--card-border-color);
+}
+
+/* Cards: Places and Reviews */
+
+.place-card,
+.review-card {
+  margin: 20px 0;
+  padding: 10px 15px;
+  border: 1px solid var(--card-border-color);
+  border-radius: 10px;
+  background-color: var(--card-bg-color);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.place-card h3 {
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
+}
+
+.place-card p {
+  margin-bottom: 1rem;
+  color: #555;
+}
+
+/* Details button */
+.details-button {
+  padding: 0.5rem 1rem;
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 5px;
+  color: var(--card-bg-color);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.details-button:hover {
+  background-color: #0a244a; /* un bleu un peu plus sombre */
+}
+
+/* Form container (ex: login form) */
+.form-container {
+  max-width: 400px;
+  margin: 2rem auto;
+  background-color: var(--card-bg-color);
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.form-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem; /* espace vertical entre les groupes de champs */
+}
+
+.form-container label {
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 400px) {
+  .form-group {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+  .form-group label {
+    min-width: 120px;
+    margin-bottom: 0;
+  }
+  .form-group input {
+    flex: 1;
+  }
+}
+
+/* Footer */
+footer {
+  background-color: var(--footer-bg-color);
+  color: var(--footer-text-color);
+  text-align: center
