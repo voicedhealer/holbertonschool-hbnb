@@ -40,7 +40,7 @@ class AmenityList(Resource):
     @api.marshal_list_with(amenity_output_model)
     def get(self):
         amenities = HBnBFacade().get_all_amenities()
-        return [amenity_to_dict(a) for a in amenities], 200
+        return [{'id': str(a.id), 'name': a.name} for a in amenities], 200
 
 @api.route('/<amenity_id>')
 class AmenityResource(Resource):

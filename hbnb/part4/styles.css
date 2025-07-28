@@ -238,3 +238,456 @@ footer {
   background-color: var(--footer-bg-color);
   color: var(--footer-text-color);
   text-align: center
+;}
+
+/* ===================================
+   STYLES POUR CREATE PLACE PAGE
+   =================================== */
+
+/* Container principal du formulaire */
+.create-place-form {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+
+/* Titre de la page */
+.container h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+/* Groupes de champs du formulaire */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+/* Champs input et textarea */
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* États d'erreur pour les champs */
+.form-group input.error,
+.form-group textarea.error {
+    border-color: #dc3545;
+    background-color: #fff5f5;
+}
+
+.form-group input.error:focus,
+.form-group textarea.error:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+/* Ligne de deux champs côte à côte (latitude/longitude) */
+.form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+/* Messages d'erreur des champs */
+.field-error {
+    display: block;
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+/* Messages d'erreur et de succès globaux */
+.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #f5c6cb;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.success-message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #c3e6cb;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.success-message a {
+    color: #0c5460;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.success-message a:hover {
+    color: #062c33;
+}
+
+/* Grille des amenities (équipements) */
+.amenities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.amenity-checkbox {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: #ffffff;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    transition: all 0.2s ease;
+}
+
+.amenity-checkbox:hover {
+    background-color: #e3f2fd;
+    border-color: #2196f3;
+}
+
+.amenity-checkbox label {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    width: 100%;
+}
+
+.amenity-checkbox input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+    margin-bottom: 0;
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+.amenity-checkbox input[type="checkbox"]:checked + span,
+.amenity-checkbox label:has(input:checked) {
+    color: #007bff;
+    font-weight: 600;
+}
+
+/* Bouton de soumission */
+.submit-button {
+    width: 100%;
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.submit-button:hover {
+    background: linear-gradient(135deg, #0056b3, #004085);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 123, 255, 0.3);
+}
+
+.submit-button:active {
+    transform: translateY(0);
+}
+
+.submit-button:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.submit-button:disabled:hover {
+    background: #6c757d;
+    transform: none;
+}
+
+/* Animation pour le bouton en cours d'envoi */
+.submit-button:disabled::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    width: 16px;
+    height: 16px;
+    margin-top: -8px;
+    border: 2px solid transparent;
+    border-top: 2px solid #ffffff;
+    border-radius: 50%;
+    animation: button-loading 1s linear infinite;
+}
+
+@keyframes button-loading {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Navigation - lien actif pour "Créer un lieu" */
+.nav-links a[href="create-place.html"] {
+    background-color: rgba(0, 123, 255, 0.1);
+    color: #007bff;
+    border-radius: 5px;
+    padding: 8px 15px;
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
+/* Tablettes */
+@media (max-width: 768px) {
+    .create-place-form {
+        margin: 10px;
+        padding: 20px;
+    }
+    
+    .container h2 {
+        font-size: 1.5rem;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .form-row .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .amenities-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Mobiles */
+@media (max-width: 480px) {
+    .create-place-form {
+        margin: 5px;
+        padding: 15px;
+    }
+    
+    .container h2 {
+        font-size: 1.3rem;
+        margin-bottom: 20px;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+        padding: 10px 12px;
+        font-size: 16px; /* Évite le zoom sur iOS */
+    }
+    
+    .submit-button {
+        padding: 12px 25px;
+        font-size: 15px;
+    }
+    
+    .amenity-checkbox {
+        padding: 6px 10px;
+    }
+    
+    .amenity-checkbox label {
+        font-size: 13px;
+    }
+}
+
+/* États visuels améliorés */
+.form-group input:valid:not(:placeholder-shown) {
+    border-color: #28a745;
+    background-color: #f8fff9;
+}
+
+.form-group input:valid:not(:placeholder-shown):focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+}
+
+/* Animation subtile pour les labels */
+.form-group label {
+    transition: color 0.2s ease;
+}
+
+.form-group input:focus + label,
+.form-group textarea:focus + label {
+    color: #007bff;
+}
+
+/* Style pour les champs requis */
+.form-group label::after {
+    content: "";
+}
+
+.form-group label:has(+ input[required])::after,
+.form-group label:has(+ textarea[required])::after {
+    content: " *";
+    color: #dc3545;
+    font-weight: bold;
+}
+
+/* Hover effects pour améliorer l'UX */
+.form-group input:hover,
+.form-group textarea:hover {
+    border-color: #b8daff;
+}
+
+/* Focus visible pour l'accessibilité */
+.submit-button:focus-visible {
+    outline: 3px solid rgba(0, 123, 255, 0.5);
+    outline-offset: 2px;
+}
+
+.amenity-checkbox input[type="checkbox"]:focus-visible {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+/* ===================================
+   STYLES COMPLÉMENTAIRES POUR CREATE PLACE
+   =================================== */
+
+/* Sections du formulaire */
+.form-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+.form-section h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Hints et conseils */
+.form-hint {
+    display: block;
+    color: #6c757d;
+    font-size: 12px;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+.form-hint a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.form-hint a:hover {
+    text-decoration: underline;
+}
+
+/* Loading state pour amenities */
+.loading-amenities {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+}
+
+.loading-amenities p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* Actions du formulaire (boutons) */
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+}
+
+.cancel-button {
+    background-color: #6c757d;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cancel-button:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+}
+
+/* Lien actif dans la navigation */
+.nav-links a.active {
+    background-color: rgba(0, 123, 255, 0.1);
+    color: #007bff !important;
+    border-radius: 5px;
+    padding: 8px 15px;
+    font-weight: 600;
+}
+
+/* Responsive pour les actions */
+@media (max-width: 480px) {
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions button {
+        width: 100%;
+    }
+    
+    .form-section {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+}

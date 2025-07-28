@@ -158,6 +158,382 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // -----------------------------------------
+    // ✅ PAGE CREATE PLACE - Formulaire de création avec validation AMÉLIORÉ
+    // -----------------------------------------
+    const createPlaceForm = document.getElementById('create-place-form');
+    const createPlaceError = document.getElementById('create-place-error');
+    const createPlaceSuccess = document.getElementById('create-place-success');
+
+    if (createPlaceForm) {
+        // Vérification que l'utilisateur est connecté
+        if (!jwt) {
+            document.body.innerHTML = `
+                <div style="text-align: center; margin-top: 50px;">
+                    <h2>Accès refusé</h2>
+                    <p>Vous devez être connecté pour créer un lieu.</p>
+                    <a href="login.html" style="color: #007bff;">Se connecter</a>
+                </div>
+            `;
+            return;
+        }
+
+        // ✅ FONCTION LOADAMENITIES COMPLÈTEMENT REÉCRITE ET SÉCURISÉE
+        function loadAmenities() {
+            const amenitiesContainer = document.getElementById('amenities-container');
+            if (!amenitiesContainer) {
+                console.error('Container amenities-container introuvable');
+                return;
+            }
+
+            // Éviter les chargements multiples
+            if (amenitiesContainer.dataset.loading === 'true') {
+                console.log('Amenities déjà en cours de chargement...');
+                return;
+            }
+
+            if (amenitiesContainer.dataset.loaded === 'true') {
+                console.log('Amenities déjà chargées');
+                return;
+            }
+
+            // Marquer comme en cours de chargement
+            amenitiesContainer.dataset.loading = 'true';
+            amenitiesContainer.innerHTML = '<div class="loading-amenities"><p>🔄 Chargement des équipements...</p></div>';
+
+            console.log('🚀 Début du chargement des amenities...');
+
+            fetch('http://localhost:5001/api/v1/amenities/', {
+                headers: { 'Authorization': 'Bearer ' + jwt },
+                credentials: 'include'
+            })
+            .then(resp => {
+                console.log('📡 Réponse API amenities:', resp.status);
+                if (!resp.ok) {
+                    throw new Error(`Erreur API: ${resp.status} ${resp.statusText}`);
+                }
+                return resp.json();
+            })
+            .then(amenities => {
+                console.log('📦 Amenities reçues:', amenities);
+                console.log('📊 Nombre d\'amenities:', amenities?.length || 0);
+
+                // Vider le container
+                amenitiesContainer.innerHTML = '';
+
+                // Vérifier que amenities est un tableau
+                if (!Array.isArray(amenities)) {
+                    throw new Error('Format de données invalide: amenities n\'est pas un tableau');
+                }
+
+                if (amenities.length === 0) {
+                    amenitiesContainer.innerHTML = '<p style="color: #6c757d; text-align: center;">Aucun équipement disponible</p>';
+                    return;
+                }
+
+                // ✅ ÉLIMINATION DES DOUBLONS côté client
+                const uniqueAmenities = amenities.filter((amenity, index, self) => {
+                    // Garder seulement le premier élément de chaque ID unique
+                    return index === self.findIndex(a => a.id === amenity.id);
+                });
+
+                console.log('🔧 Amenities uniques après filtrage:', uniqueAmenities.length);
+
+                // Créer les checkboxes pour chaque amenity unique
+                uniqueAmenities.forEach((amenity, index) => {
+                    console.log(`➕ Création checkbox ${index + 1}:`, amenity.name);
+                    
+                    const checkboxDiv = document.createElement('div');
+                    checkboxDiv.className = 'amenity-checkbox';
+                    checkboxDiv.innerHTML = `
+                        <label>
+                            <input type="checkbox" name="amenities" value="${amenity.id}">
+                            ${amenity.name}
+                        </label>
+                    `;
+                    amenitiesContainer.appendChild(checkboxDiv);
+                });
+
+                // Marquer comme chargé avec succès
+                amenitiesContainer.dataset.loaded = 'true';
+                amenitiesContainer.dataset.loading = 'false';
+                console.log('✅ Amenities chargées avec succès!');
+            })
+            .catch(err => {
+                console.error('❌ Erreur chargement amenities:', err);
+                amenitiesContainer.innerHTML = `
+                    <div style="color: #dc3545; text-align: center; padding: 20px;">
+                        <p>❌ Erreur de chargement des équipements</p>
+                        <p style="font-size: 12px;">${err.message}</p>
+                        <button onclick="location.reload()" style="background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">
+                            Recharger la page
+                        </button>
+                    </div>
+                `;
+                amenitiesContainer.dataset.loading = 'false';
+            });
+        }
+
+        // Charger les amenities au chargement de la page
+        loadAmenities();
+
+        // ✅ FONCTIONS UTILITAIRES POUR VALIDATION (déclarées EN PREMIER)
+        function showFieldError(errorId, message) {
+            const errorSpan = document.getElementById(errorId);
+            if (errorSpan) {
+                errorSpan.textContent = message;
+                errorSpan.style.display = 'block';
+            }
+        }
+
+        function hideFieldError(errorId) {
+            const errorSpan = document.getElementById(errorId);
+            if (errorSpan) {
+                errorSpan.style.display = 'none';
+            }
+        }
+
+        // ✅ FONCTIONS DE VALIDATION GPS (déclarées correctement)
+        function validateLatitude(latitudeInput) {
+            const value = parseFloat(latitudeInput.value);
+            if (!latitudeInput.value.trim()) {
+                showFieldError('latitude-error', 'La latitude est obligatoire');
+                latitudeInput.classList.add('error');
+                return false;
+            } else if (isNaN(value) || value < -90 || value > 90) {
+                showFieldError('latitude-error', 'La latitude doit être entre -90 et 90');
+                latitudeInput.classList.add('error');
+                return false;
+            } else {
+                hideFieldError('latitude-error');
+                latitudeInput.classList.remove('error');
+                return true;
+            }
+        }
+
+        function clearLatitudeError(latitudeInput) {
+            if (latitudeInput.classList.contains('error')) {
+                hideFieldError('latitude-error');
+                latitudeInput.classList.remove('error');
+            }
+        }
+
+        function validateLongitude(longitudeInput) {
+            const value = parseFloat(longitudeInput.value);
+            if (!longitudeInput.value.trim()) {
+                showFieldError('longitude-error', 'La longitude est obligatoire');
+                longitudeInput.classList.add('error');
+                return false;
+            } else if (isNaN(value) || value < -180 || value > 180) {
+                showFieldError('longitude-error', 'La longitude doit être entre -180 et 180');
+                longitudeInput.classList.add('error');
+                return false;
+            } else {
+                hideFieldError('longitude-error');
+                longitudeInput.classList.remove('error');
+                return true;
+            }
+        }
+
+        function clearLongitudeError(longitudeInput) {
+            if (longitudeInput.classList.contains('error')) {
+                hideFieldError('longitude-error');
+                longitudeInput.classList.remove('error');
+            }
+        }
+
+        // ✅ VALIDATION EN TEMPS RÉEL DES CHAMPS (corrigée)
+        const titleInput = document.getElementById('place-title');
+        const descriptionInput = document.getElementById('place-description');
+        const priceInput = document.getElementById('place-price');
+        const latitudeInput = document.getElementById('place-latitude');
+        const longitudeInput = document.getElementById('place-longitude');
+
+        // Validation du titre (obligatoire, min 3 caractères)
+        if (titleInput) {
+            titleInput.addEventListener('input', () => {
+                hideFieldError('title-error');
+                titleInput.classList.remove('error');
+            });
+
+            titleInput.addEventListener('blur', () => {
+                const value = titleInput.value.trim();
+                if (!value) {
+                    showFieldError('title-error', 'Le titre est obligatoire');
+                    titleInput.classList.add('error');
+                } else if (value.length < 3) {
+                    showFieldError('title-error', 'Le titre doit contenir au moins 3 caractères');
+                    titleInput.classList.add('error');
+                } else {
+                    hideFieldError('title-error');
+                    titleInput.classList.remove('error');
+                }
+            });
+        }
+
+        // Validation du prix (obligatoire, positif)
+        if (priceInput) {
+            priceInput.addEventListener('input', () => {
+                hideFieldError('price-error');
+                priceInput.classList.remove('error');
+            });
+
+            priceInput.addEventListener('blur', () => {
+                const value = parseFloat(priceInput.value);
+                if (!priceInput.value) {
+                    showFieldError('price-error', 'Le prix est obligatoire');
+                    priceInput.classList.add('error');
+                } else if (isNaN(value) || value <= 0) {
+                    showFieldError('price-error', 'Le prix doit être un nombre positif');
+                    priceInput.classList.add('error');
+                } else {
+                    hideFieldError('price-error');
+                    priceInput.classList.remove('error');
+                }
+            });
+        }
+
+        // Validation latitude (corrigée)
+        if (latitudeInput) {
+            latitudeInput.addEventListener('input', () => clearLatitudeError(latitudeInput));
+            latitudeInput.addEventListener('focus', () => clearLatitudeError(latitudeInput));
+            latitudeInput.addEventListener('blur', () => validateLatitude(latitudeInput));
+        }
+
+        // Validation longitude (corrigée)
+        if (longitudeInput) {
+            longitudeInput.addEventListener('input', () => clearLongitudeError(longitudeInput));
+            longitudeInput.addEventListener('focus', () => clearLongitudeError(longitudeInput));
+            longitudeInput.addEventListener('blur', () => validateLongitude(longitudeInput));
+        }
+
+        // ✅ SOUMISSION DU FORMULAIRE (améliorée)
+        createPlaceForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            
+            // Masquer les messages précédents
+            if (createPlaceError) createPlaceError.style.display = 'none';
+            if (createPlaceSuccess) createPlaceSuccess.style.display = 'none';
+
+            // Collecte des données du formulaire
+            const formData = new FormData(createPlaceForm);
+            const selectedAmenities = Array.from(document.querySelectorAll('input[name="amenities"]:checked'))
+                .map(checkbox => checkbox.value);
+
+            const placeData = {
+                title: formData.get('title')?.trim() || '',
+                description: formData.get('description')?.trim() || '',
+                price: parseFloat(formData.get('price') || '0'),
+                latitude: parseFloat(formData.get('latitude') || '0'),
+                longitude: parseFloat(formData.get('longitude') || '0'),
+                owner_id: "auto", // Sera défini côté serveur via JWT
+                amenities: selectedAmenities
+            };
+
+            console.log('📋 Données à envoyer:', placeData);
+
+            // Validation finale côté client
+            const validationErrors = [];
+            
+            if (!placeData.title || placeData.title.length < 3) {
+                validationErrors.push('Le titre doit contenir au moins 3 caractères');
+            }
+            
+            if (!placeData.price || placeData.price <= 0) {
+                validationErrors.push('Le prix doit être un nombre positif');
+            }
+            
+            if (isNaN(placeData.latitude) || placeData.latitude < -90 || placeData.latitude > 90) {
+                validationErrors.push('Latitude invalide (doit être entre -90 et 90)');
+            }
+            
+            if (isNaN(placeData.longitude) || placeData.longitude < -180 || placeData.longitude > 180) {
+                validationErrors.push('Longitude invalide (doit être entre -180 et 180)');
+            }
+
+            if (validationErrors.length > 0) {
+                if (createPlaceError) {
+                    createPlaceError.innerHTML = validationErrors.join('<br>');
+                    createPlaceError.style.display = 'block';
+                }
+                return;
+            }
+
+            try {
+                // Désactiver le bouton pendant l'envoi
+                const submitButton = createPlaceForm.querySelector('button[type="submit"]');
+                const originalText = submitButton?.textContent || 'Créer le lieu';
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.textContent = 'Création en cours...';
+                }
+
+                console.log('🚀 Envoi des données au serveur...');
+
+                const response = await fetch('http://localhost:5001/api/v1/places/', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + jwt
+                    },
+                    body: JSON.stringify(placeData)
+                });
+
+                console.log('📡 Réponse serveur:', response.status);
+
+                if (response.ok) {
+                    const newPlace = await response.json();
+                    console.log('✅ Lieu créé:', newPlace);
+                    
+                    // Afficher le message de succès
+                    if (createPlaceSuccess) {
+                        createPlaceSuccess.innerHTML = `
+                            <strong>Succès !</strong> Votre lieu "${newPlace.name}" a été créé avec succès.
+                            <br><a href="place.html?id=${newPlace.id}">Voir le lieu créé</a>
+                        `;
+                        createPlaceSuccess.style.display = 'block';
+                    }
+                    
+                    // Réinitialiser le formulaire
+                    createPlaceForm.reset();
+                    
+                    // Redirection automatique après 3 secondes
+                    setTimeout(() => {
+                        window.location.href = `place.html?id=${newPlace.id}`;
+                    }, 3000);
+                    
+                } else {
+                    let errorMessage = 'Erreur lors de la création du lieu';
+                    try {
+                        const errorData = await response.json();
+                        console.log('❌ Erreur serveur:', errorData);
+                        if (errorData.error) {
+                            errorMessage = errorData.error;
+                        } else if (errorData.message) {
+                            errorMessage = errorData.message;
+                        }
+                    } catch (_) {}
+                    
+                    throw new Error(errorMessage);
+                }
+            } catch (error) {
+                console.error('❌ Erreur création lieu:', error);
+                if (createPlaceError) {
+                    createPlaceError.textContent = error.message || 'Erreur inconnue lors de la création';
+                    createPlaceError.style.display = 'block';
+                }
+            } finally {
+                // Réactiver le bouton
+                const submitButton = createPlaceForm.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.textContent = originalText;
+                }
+            }
+        });
+    }
+
+    // -----------------------------------------
     // PAGE DETAILS (place.html) : infos lieu, avis, formulaire avis
     // -----------------------------------------
     const placeDetailsSection = document.querySelector('.place-details');
