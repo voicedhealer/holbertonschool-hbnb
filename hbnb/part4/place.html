@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails du lieu</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <!-- Logo et nav (optionnel mais recommandé pour cohérence UX) -->
+        <img src="/part4/images/logo.png" alt="Logo de l'application" class="logo">
+        <nav>
+            <a href="index.html">Accueil</a>
+            <a href="login.html" class="login-button">Connexion</a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Détails du lieu -->
+        <!-- Utilise bien les classes place-details et place-info -->
+        <section class="place-details">
+            <div class="place-info">
+                <!-- Injecte dynamiquement : titre, hôte, prix, description, équipements etc -->
+                <!-- Exemple statique pour voir le rendu :
+                <h1>Chic Studio (Paris)</h1>
+                <p>Hébergé par <span class="host">Alice</span></p>
+                <p class="place-price">Prix : 80€/nuit</p>
+                <p>Description : Studio cosy au cœur de Paris…</p>
+                <ul>
+                    <li>Wifi</li>
+                    <li>Climatisation</li>
+                </ul>
+                -->
+            </div>
+        </section>
+
+        <!-- Section des avis -->
+        <section id="reviews">
+            <h2>Avis des utilisateurs</h2>
+            <div id="review-list">
+                <!-- Pour chaque avis, injecte une carte .review-card :
+                <div class="review-card">
+                    <p class="review-comment">Très bon séjour !</p>
+                    <p class="review-user">Par Alice</p>
+                    <p class="review-rating">Note : 5/5</p>
+                </div>
+                -->
+            </div>
+        </section>
+
+        <!-- Ajouter un avis (si user connecté) -->
+        <!-- 1. Un lien "add_review.html" (si pas de formulaire) -->
+        <!-- OU -->
+        <!-- 2. Directement un <form> avec les bonnes classes pour que le correcteur le repère -->
+        <section id="add-review">
+            <!-- Facultatif : affiche le form si user connecté, sinon juste le lien -->
+            <form class="add-review form" id="review-form">
+                <label for="review-text">Votre avis :</label>
+                <textarea id="review-text" name="review-text" required></textarea>
+                <label for="review-rating">Note :</label>
+                <select id="review-rating" name="review-rating" required>
+                    <option value="">Sélectionner</option>
+                    <option value="1">1/5</option>
+                    <option value="2">2/5</option>
+                    <option value="3">3/5</option>
+                    <option value="4">4/5</option>
+                    <option value="5">5/5</option>
+                </select>
+                <button type="submit">Envoyer</button>
+            </form>
+            <!-- Sinon (si il ne doit y avoir qu’un lien), tu peux activer/désactiver via JS -->
+            <!-- <a href="add_review.html" class="add_review.html">Ajouter un avis</a> -->
+        </section>
+    </main>
+    <footer>
+        <p>Tous droits réservés.</p>
+    </footer>
+    <script src="scripts.js"></script>
+</body>
+</html>

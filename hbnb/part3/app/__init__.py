@@ -1,6 +1,7 @@
 from flask_restx import Api
 from flask import Flask
 from app.extensions import db, jwt
+from flask_cors import CORS
 
 def create_app(config_name='default'):
     from config import config
@@ -13,6 +14,11 @@ def create_app(config_name='default'):
     db.init_app(app)
     jwt.init_app(app)
 
+    CORS(app, 
+     origins=["http://127.0.0.1:5500", "http://localhost:5500"], 
+     supports_credentials=True,
+     
+     allow_headers=["Content-Type", "Authorization"])
     authorizations = {
         'Bearer Auth': {
             'type': 'apiKey',
