@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes lieux - HBnB</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="nav-container">
+                <h1><a href="index.html">HBnB</a></h1>
+                <div class="nav-links">
+                    <a href="index.html">Accueil</a>
+                    <a href="create-place.html">Créer un lieu</a>
+                    <a href="my-places.html" class="active">Mes lieux</a>
+                    <a href="#" class="login-button">Connexion</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="my-places-header">
+                <h2>Mes lieux</h2>
+                <a href="create-place.html" class="btn btn-primary">
+                    ➕ Créer un nouveau lieu
+                </a>
+            </div>
+
+            <!-- Statistiques -->
+            <div id="my-places-stats" class="stats-container" style="display: none;">
+                <div class="stat-card">
+                    <h3 id="total-places">-</h3>
+                    <p>Lieux créés</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="average-price">-</h3>
+                    <p>Prix moyen/nuit</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="total-reviews">-</h3>
+                    <p>Avis reçus</p>
+                </div>
+            </div>
+
+            <!-- Messages d'état -->
+            <div id="my-places-error" class="error-message" style="display: none;"></div>
+            <div id="my-places-success" class="success-message" style="display: none;"></div>
+
+            <!-- Liste des lieux -->
+            <div id="my-places-list" class="my-places-grid">
+                <div class="loading-places">
+                    <p>🔄 Chargement de vos lieux...</p>
+                </div>
+            </div>
+
+            <!-- Message si aucun lieu -->
+            <div id="no-places-message" class="no-places-container" style="display: none;">
+                <div class="no-places-content">
+                    <h3>🏠 Vous n'avez encore aucun lieu</h3>
+                    <p>Commencez dès maintenant à proposer votre logement !</p>
+                    <a href="create-place.html" class="btn btn-primary btn-large">
+                        Créer mon premier lieu
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal de confirmation suppression -->
+    <div id="delete-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Confirmer la suppression</h3>
+            <p>Êtes-vous sûr de vouloir supprimer ce lieu ?</p>
+            <p><strong id="delete-place-name"></strong></p>
+            <p class="warning-text">⚠️ Cette action est irréversible</p>
+            <div class="modal-actions">
+                <button id="cancel-delete" class="btn btn-secondary">Annuler</button>
+                <button id="confirm-delete" class="btn btn-danger">Supprimer</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy;Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script src="scripts.js"></script>
+</body>
+</html>

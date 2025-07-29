@@ -29,7 +29,6 @@ place_model = api.model('Place', {
     'price': fields.Float(required=True),
     'latitude': fields.Float(required=True),
     'longitude': fields.Float(required=True),
-    'owner_id': fields.String(required=True),
     'amenities': fields.List(fields.String, required=True)
 })
 
@@ -107,6 +106,16 @@ class PlaceList(Resource):
     @jwt_required()
     def post(self):
         data = api.payload
+        from flask_jwt_extended import get_jwt_identity
+
+        # ✅ RÉCUPÉRER L'USER_ID DEPUIS LE JWT
+        current_user_id = get_jwt_identity()
+        if not current_user_id:
+            return {'error': 'User identification failed'}, 401
+        
+        # ✅ RÉCUPÉRER LES DONNÉES ET AJOUTER L'OWNER_ID
+        data = api.payload.copy()
+        data['owner_id'] = current_user_id
 
         # Vérification unicité géolocalisation
         latitude = data.get('latitude')
