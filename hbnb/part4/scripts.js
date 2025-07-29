@@ -34,6 +34,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // ✅ FONCTION DE CONNEXION RAPIDE POUR LES COMPTES DE TEST
+window.quickLogin = function(email, password) {
+    // Pré-remplir les champs
+    document.getElementById('email').value = email;
+    document.getElementById('password').value = password;
+    
+    // Simuler la soumission du formulaire
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        // Animation visuelle
+        const button = document.querySelector('.login-button-submit');
+        if (button) {
+            button.textContent = 'Connexion en cours...';
+            button.classList.add('loading');
+        }
+        
+        // Déclencher la soumission après un petit délai pour l'animation
+        setTimeout(() => {
+            loginForm.dispatchEvent(new Event('submit'));
+        }, 500);
+    }
+};
+
+
     // -----------------------------------------
     // PAGE LOGIN : gestion formulaire connexion + erreurs
     // -----------------------------------------

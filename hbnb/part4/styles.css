@@ -92,22 +92,393 @@ nav a:hover {
   white-space: nowrap;
 }
 
-/* Logout button */
-#logout-button {
-  cursor: pointer;
-  padding: 0.3rem 0.6rem;
-  border: none;
-  background-color: var(--button-bg-color);
-  color: var(--button-text-color);
-  border-radius: 4px;
-  font-size: 0.9rem;
-  display: none; /* hidden by default */
-  transition: background-color 0.3s;
+/* ===================================
+   STYLES MODERNES POUR LOGIN PAGE
+   =================================== */
+
+.login-page {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-#logout-button:hover {
-  background-color: var(--button-hover-bg-color);
+/* Header simplifié */
+.login-header {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
+
+.login-header .nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.login-header .logo {
+    height: 40px;
+    filter: brightness(0) invert(1); /* Logo blanc */
+}
+
+.login-header .nav-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.login-header .nav-links a:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(-5px);
+}
+
+/* Main container */
+.login-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 70px);
+    padding: 20px;
+}
+
+.login-wrapper {
+    width: 100%;
+    max-width: 420px;
+}
+
+/* Card principale */
+.login-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.login-header-content {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-header-content h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.login-header-content p {
+    color: #6c757d;
+    font-size: 16px;
+    margin: 0;
+}
+
+/* Formulaire moderne */
+.login-form {
+    margin-bottom: 30px;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 16px 20px;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    background: #f8f9fa;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    transform: translateY(-2px);
+}
+
+.input-group input::placeholder {
+    color: #adb5bd;
+}
+
+/* Bouton de connexion principal */
+.login-button-submit {
+    width: 100%;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-button-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.login-button-submit:active {
+    transform: translateY(0);
+}
+
+.login-button-submit:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Animation de chargement */
+.login-button-submit.loading::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    margin: auto;
+    border: 2px solid transparent;
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Divider */
+.login-divider {
+    text-align: center;
+    margin: 30px 0;
+    position: relative;
+}
+
+.login-divider::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #e9ecef;
+}
+
+.login-divider span {
+    background: white;
+    padding: 0 20px;
+    color: #6c757d;
+    font-size: 14px;
+    position: relative;
+}
+
+/* ✅ Section bottom intégrée dans la card */
+.login-bottom-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #f8f9fa;
+}
+
+.discover-link {
+    text-align: center;
+    color: #6c757d;
+    font-size: 14px;
+    margin: 15px 0 0 0;
+    font-weight: 500;
+}
+
+.discover-link a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.discover-link a:hover {
+    background: #f8f9fa;
+    color: #764ba2;
+    text-decoration: underline;
+}
+/* ✅ Section découverte intégrée dans la card */
+.login-discover-section {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #f1f3f4;
+    text-align: center;
+}
+
+.discover-text {
+    margin: 0;
+    font-size: 14px;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.discover-link {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.discover-link:hover {
+    background: #f8f9fa;
+    color: #764ba2;
+    transform: translateY(-1px);
+}
+
+/* Section comptes de test */
+.test-accounts-section h3 {
+    text-align: center;
+    color: #333;
+    font-size: 16px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.test-accounts-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.test-account-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 16px;
+    border: 2px solid #f8f9fa;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.test-account-card:hover {
+    border-color: #667eea;
+    background: #f8f9fa;
+    transform: translateY(-2px);
+}
+
+.test-account-avatar {
+    font-size: 24px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.test-account-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.test-account-info strong {
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.test-account-info span {
+    color: #6c757d;
+    font-size: 12px;
+}
+
+/* Footer */
+.login-footer {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.login-footer p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+}
+
+.login-footer a {
+    color: white;
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+/* Messages d'erreur */
+.error-message {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .login-main {
+        padding: 10px;
+    }
+    
+    .login-card {
+        padding: 30px 20px;
+        border-radius: 16px;
+    }
+    
+    .login-header-content h1 {
+        font-size: 1.6rem;
+    }
+    
+    .input-group input,
+    .login-button-submit {
+        padding: 14px 16px;
+    }
+}
+
+/* Animation d'entrée */
+.login-card {
+    animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 
 /* Lien retour joli, lisible et placé */
 .back-to-home {

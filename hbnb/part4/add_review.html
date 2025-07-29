@@ -3,23 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Review</title>
+    <title>Ajouter un avis - HBnB</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- ✅ HEADER COHÉRENT -->
+    <header>
+        <nav>
+            <div class="nav-container">
+                <div class="nav-brand">
+                    <a href="index.html">
+                        <img src="/part4/images/logo.png" alt="HBnB" class="logo">
+                    </a>
+                </div>
+                <div class="nav-links">
+                    <a href="index.html">Accueil</a>
+                    <a href="create-place.html">Créer un lieu</a>
+                    <a href="my-places.html">Mes lieux</a>
+                    <a href="#" class="login-button">Connexion</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
     <main>
-        <!-- Add something to idfentify the place you're reviewing -->
-        <form id="review-form">
-            <h2>Add a Review</h2>
-            <label for="review">Your Review:</label>
-            <textarea id="review" name="review" required></textarea>
-            <label for="rating">Rating:</label>
-            <select id="rating" name="rating" required>
-                <!-- Options for rating -->
-            </select>
-            <button type="submit">Submit Review</button>
-        </form>
-    </main>
-    <script src="scripts.js"></script>
-</body>
-</html>
+        <div class="container">
+            <!-- ✅ INFORMATION DU LIEU -->
+            <div class="review-header">
+                <h2>Ajouter un avis</h2>
+                <div id="place-info-mini" class="place-info-mini">
+                    <p>🔄 Chargement des informations du lieu...</p>
+                </div>
+                <a href="#" id="back-to-place" class="btn btn-secondary" style="display: none;">
+                    ← Retour au lieu
+                </a>
+            </div>
+
+            <!-- ✅ MESSAGES D'ÉTAT -->
+            <div id="review-error" class="error-message" style="display: none;"></div>
+            <div id="review-success" class="success-message" style="display: none;"></div>
+
+            <!-- ✅ FORMULAIRE D'AVIS CORRIGÉ -->
+            <div class="review-form-container">
+                <form id="review-form" class="review-form">
+                    <div class="form-group">
+                        <label for="review-text">Votre avis :</label>
+                        <textarea id="review-text" name="review-text" required 
+                                  placeholder="Partagez votre expérience dans ce lieu..."
+                                  rows="5"></textarea>
+                        <small class="form-hint">Décrivez votre séjour, les points positifs et négatifs</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="review-rating">Note :</label>
+                        <select id="review-rating" name="review-rating" required>
+                            <option value="">Choisissez une note</option>
+                            <option value="1">⭐ 1 - Très décevant</option>
+                            <option value="2">⭐⭐ 2 - Décevant</option>
+                            <option value="3">⭐⭐⭐ 3 - Correct</option>
+                            <option value="4">⭐⭐⭐⭐ 4 - Très bien</option>
+                            <option value="5">⭐⭐⭐⭐⭐ 5 - Excellent</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" id="cancel-review" class="cancel-button">
+                            Annuler
+                        </button>
+                        <button type="submit" class="submit-button">
+                            📝 Publier l'avis
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- ✅ RÈGLES D'UTILISATION -->
+            <div class="review-rules">
+                <h3>Règles pour les avis</h3>
+                <ul>
+                    <li>✅ Soyez respectueux et constructif</li>
+                    <li>✅ Basez-vous sur votre expérience réelle</li>
+                    <li>✅ Évitez les informations personnelles</li>

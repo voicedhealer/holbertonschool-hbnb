@@ -3,42 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion</title>
+    <title>Connexion - HBnB</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <header>
-        <!-- Pour rappel la cohérence UX et la navigation sur toutes les pages -->
-        <img src="/part4/images/logo.png" alt="Logo de l'application" class="logo">
+<body class="login-page">
+    <!-- ✅ HEADER SIMPLIFIÉ POUR LA PAGE LOGIN -->
+    <header class="login-header">
         <nav>
-            <div class="nav-links">
-            <a href="index.html">Accueil</a>
-            <a href="create-place.html">Créer un lieu</a>
-            <a href="#" class="login-button">Connexion</a>
+            <div class="nav-container">
+                <div class="nav-brand">
+                    <a href="index.html">
+                        <img src="/part4/images/logo.png" alt="HBnB" class="logo">
+                    </a>
+                </div>
+                <!-- ✅ Navigation simplifiée - PAS de bouton connexion -->
+                <div class="nav-links">
+                    <a href="index.html">← Retour à l'accueil</a>
+                </div>
             </div>
-
         </nav>
     </header>
 
-    <main>
-        <form id="login-form" class="login-form">
-            <h2>Connexion</h2>
-            <label for="email">Email :</label>
-            <input type="email" id="email" name="email" required>
+    <main class="login-main">
+        <div class="login-wrapper">
+            <!-- ✅ CARD DE CONNEXION MODERNE -->
+            <div class="login-card">
+                <div class="login-header-content">
+                    <h1>Bon retour !</h1>
+                    <p>Connectez-vous à votre compte HBnB</p>
+                </div>
 
-            <label for="password">Mot de passe :</label>
-            <input type="password" id="password" name="password" required>
+                <!-- Messages d'état -->
+                <div id="login-error" class="error-message" style="display: none;"></div>
 
-            <button type="submit">Se connecter</button>
+                <form id="login-form" class="login-form">
+                    <div class="input-group">
+                        <label for="email">Adresse email</label>
+                        <input type="email" id="email" name="email" required 
+                               placeholder="votre@email.com">
+                    </div>
 
-            <!-- Bloc d'affichage d'erreur JS, caché au chargement -->
-            <p id="login-error" class="error-message" style="display: none; color: red;"></p>
-        </form>
+                    <div class="input-group">
+                        <label for="password">Mot de passe</label>
+                        <input type="password" id="password" name="password" required 
+                               placeholder="••••••••">
+                    </div>
+
+                    <button type="submit" class="login-button-submit">
+                        Se connecter
+                    </button>
+                </form>
+
+                <!-- ✅ DIVIDER UNIQUE -->
+                <div class="login-divider">
+                    <span>ou</span>
+                </div>
+
+                <!-- ✅ SECTION COMPTES DE TEST (qui manquait) -->
+                <div class="test-accounts-section">
+                    <h3>🧪 Comptes de test</h3>
+                    <div class="test-accounts-grid">
+                        <div class="test-account-card" onclick="quickLogin('alice@example.com', 'password')">
+                            <div class="test-account-avatar">👩‍💼</div>
+                            <div class="test-account-info">
+                                <strong>Alice Doe</strong>
+                                <span>Propriétaire</span>
+                            </div>
+                        </div>
+                        <div class="test-account-card" onclick="quickLogin('bob@example.com', 'password')">
+                            <div class="test-account-avatar">👨‍💻</div>
+                            <div class="test-account-info">
+                                <strong>Bob Smith</strong>
+                                <span>Voyageur</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ✅ SECTION DÉCOUVERTE INTÉGRÉE DANS LA CARD -->
+                <div class="login-discover-section">
+                    <p class="discover-text">
+                        Première visite ? 
+                        <a href="index.html" class="discover-link">Découvrez nos lieux</a>
+                    </p>
+                </div>
+
+            </div> <!-- ✅ Fermeture correcte de login-card -->
+        </div> <!-- ✅ Fermeture correcte de login-wrapper -->
     </main>
-
-    <footer>
-        <p>Tous droits réservés.</p>
-    </footer>
 
     <script src="scripts.js"></script>
 </body>

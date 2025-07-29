@@ -7,11 +7,16 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- ✅ HEADER CORRIGÉ -->
+    <!-- ✅ HEADER AVEC SEULEMENT LE LOGO -->
     <header>
         <nav>
             <div class="nav-container">
-                <h1><a href="index.html">HBnB</a></h1>
+                <!-- ✅ Seulement le logo, pas de texte -->
+                <div class="nav-brand">
+                    <a href="index.html">
+                        <img src="/part4/images/logo.png" alt="HBnB" class="logo">
+                    </a>
+                </div>
                 <div class="nav-links">
                     <a href="index.html" class="active">Accueil</a>
                     <a href="create-place.html">Créer un lieu</a>
@@ -23,7 +28,6 @@
     </header>
 
     <main>
-        <!-- ✅ CONTAINER AJOUTÉ -->
         <div class="container">
             <!-- Filtres -->
             <section id="filter">

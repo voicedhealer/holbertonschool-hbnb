@@ -3,83 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Détails du lieu</title>
+    <title>Détails du lieu - HBnB</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- ✅ HEADER COHÉRENT AVEC LES AUTRES PAGES -->
     <header>
-        <!-- Logo et nav (optionnel mais recommandé pour cohérence UX) -->
-        <img src="/part4/images/logo.png" alt="Logo de l'application" class="logo">
         <nav>
-            <a href="index.html">Accueil</a>
-            <div class="nav-links">
-            <a href="create-place.html">Créer un lieu</a>
-            <a href="#" class="login-button">Connexion</a>
+            <div class="nav-container">
+                <!-- ✅ Même structure logo que les autres pages -->
+                <div class="nav-brand">
+                    <a href="index.html">
+                        <img src="/part4/images/logo.png" alt="HBnB" class="logo">
+                    </a>
+                </div>
+                <!-- ✅ Navigation complète et cohérente -->
+                <div class="nav-links">
+                    <a href="index.html">Accueil</a>
+                    <a href="create-place.html">Créer un lieu</a>
+                    <a href="my-places.html">Mes lieux</a>
+                    <a href="#" class="login-button">Connexion</a>
+                </div>
             </div>
-
         </nav>
     </header>
 
     <main>
-        <!-- Détails du lieu -->
-        <!-- Utilise bien les classes place-details et place-info -->
-        <section class="place-details">
-            <div class="place-info">
-                <!-- Injecte dynamiquement : titre, hôte, prix, description, équipements etc -->
-                <!-- Exemple statique pour voir le rendu :
-                <h1>Chic Studio (Paris)</h1>
-                <p>Hébergé par <span class="host">Alice</span></p>
-                <p class="place-price">Prix : 80€/nuit</p>
-                <p>Description : Studio cosy au cœur de Paris…</p>
-                <ul>
-                    <li>Wifi</li>
-                    <li>Climatisation</li>
-                </ul>
-                -->
+        <!-- ✅ CONTAINER AJOUTÉ POUR COHÉRENCE -->
+        <div class="container">
+            <!-- ✅ Messages d'état ajoutés -->
+            <div id="place-error" class="error-message" style="display: none;"></div>
+            <div id="place-loading" class="loading-message">
+                <p>🔄 Chargement des détails du lieu...</p>
             </div>
-        </section>
 
-        <!-- Section des avis -->
-        <section id="reviews">
-            <h2>Avis des utilisateurs</h2>
-            <div id="review-list">
-                <!-- Pour chaque avis, injecte une carte .review-card :
-                <div class="review-card">
-                    <p class="review-comment">Très bon séjour !</p>
-                    <p class="review-user">Par Alice</p>
-                    <p class="review-rating">Note : 5/5</p>
+            <!-- Détails du lieu -->
+            <section class="place-details">
+                <div class="place-info">
+                    <!-- Injecté dynamiquement par JavaScript -->
+                    <!-- Exemple de structure attendue :
+                    <h1>Nom du lieu (Ville)</h1>
+                    <p>Hébergé par <span class="host">Nom hôte</span></p>
+                    <p class="place-price">Prix : XX €/nuit</p>
+                    <p>Description : ...</p>
+                    <ul>
+                        <li>Équipement 1</li>
+                        <li>Équipement 2</li>
+                    </ul>
+                    -->
                 </div>
-                -->
-            </div>
-        </section>
 
-        <!-- Ajouter un avis (si user connecté) -->
-        <!-- 1. Un lien "add_review.html" (si pas de formulaire) -->
-        <!-- OU -->
-        <!-- 2. Directement un <form> avec les bonnes classes pour que le correcteur le repère -->
-        <section id="add-review">
-            <!-- Facultatif : affiche le form si user connecté, sinon juste le lien -->
-            <form class="add-review form" id="review-form">
-                <label for="review-text">Votre avis :</label>
-                <textarea id="review-text" name="review-text" required></textarea>
-                <label for="review-rating">Note :</label>
-                <select id="review-rating" name="review-rating" required>
-                    <option value="">Sélectionner</option>
-                    <option value="1">1/5</option>
-                    <option value="2">2/5</option>
-                    <option value="3">3/5</option>
-                    <option value="4">4/5</option>
-                    <option value="5">5/5</option>
-                </select>
-                <button type="submit">Envoyer</button>
-            </form>
-            <!-- Sinon (si il ne doit y avoir qu’un lien), tu peux activer/désactiver via JS -->
-            <!-- <a href="add_review.html" class="add_review.html">Ajouter un avis</a> -->
-        </section>
+                <!-- ✅ Actions sur le lieu (si propriétaire) -->
+                <div id="place-actions" class="place-actions" style="display: none;">
+                    <a href="#" id="edit-place-link" class="btn btn-primary">
+                        ✏️ Éditer ce lieu
+                    </a>
+                    <a href="my-places.html" class="btn btn-secondary">
+                        📋 Mes lieux
+                    </a>
+                </div>
+            </section>
+
+            <!-- Section des avis -->
+            <section id="reviews" class="reviews-section">
+                <h2>Avis des utilisateurs</h2>
+                <div id="review-list">
+                    <!-- Injecté dynamiquement :
+                    <div class="review-card">
+                        <p class="review-comment">Commentaire...</p>
+                        <p class="review-user">Par Utilisateur</p>
+                        <p class="review-rating">Note : X/5</p>
+                    </div>
+                    -->
+                </div>
+            </section>
+
+            <!-- ✅ Ajouter un avis (si user connecté) -->
+            <section id="add-review" class="add-review-section" style="display: none;">
+                <h3>Laisser un avis</h3>
+                
+                <!-- Messages d'erreur/succès pour les avis -->
+                <div id="review-error" class="error-message" style="display: none;"></div>
+                <div id="review-success" class="success-message" style="display: none;"></div>
+
+                <form id="review-form" class="review-form">
+                    <div class="form-group">
+                        <label for="review-text">Votre avis :</label>
+                        <textarea id="review-text" name="review-text" required 
+                                  placeholder="Partagez votre expérience..." rows="4"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="review-rating">Note :</label>
+                        <select id="review-rating" name="review-rating" required>
+                            <option value="">Choisissez une note</option>
+                            <option value="1">⭐ 1/5 - Très décevant</option>
+                            <option value="2">⭐⭐ 2/5 - Décevant</option>
+                            <option value="3">⭐⭐⭐ 3/5 - Correct</option>
+                            <option value="4">⭐⭐⭐⭐ 4/5 - Très bien</option>
+                            <option value="5">⭐⭐⭐⭐⭐ 5/5 - Excellent</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="submit-button">
+                        📝 Publier l'avis
+                    </button>
+                </form>
+            </section>
+
+            <!-- ✅ Lien pour utilisateurs non connectés -->
+            <section id="review-login-prompt" class="review-login-prompt" style="display: none;">
+                <div class="login-prompt-content">
+                    <h3>💬 Laisser un avis</h3>
+                    <p>Connectez-vous pour partager votre expérience</p>
+                    <a href="login.html" class="btn btn-primary">Se connecter</a>
+                </div>
+            </section>
+        </div>
     </main>
+
+    <!-- ✅ FOOTER COHÉRENT -->
     <footer>
-        <p>Tous droits réservés.</p>
+        <div class="container">
+            <p>&copy; 2025 HBnB. Tous droits réservés.</p>
+        </div>
     </footer>
+
     <script src="scripts.js"></script>
 </body>
 </html>
