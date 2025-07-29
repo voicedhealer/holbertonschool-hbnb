@@ -35,28 +35,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ✅ FONCTION DE CONNEXION RAPIDE POUR LES COMPTES DE TEST
-window.quickLogin = function(email, password) {
-    // Pré-remplir les champs
-    document.getElementById('email').value = email;
-    document.getElementById('password').value = password;
-    
-    // Simuler la soumission du formulaire
-    const loginForm = document.getElementById('login-form');
-    if (loginForm) {
-        // Animation visuelle
-        const button = document.querySelector('.login-button-submit');
-        if (button) {
-            button.textContent = 'Connexion en cours...';
-            button.classList.add('loading');
-        }
+    window.quickLogin = function(email, password) {
+        // Pré-remplir les champs
+        document.getElementById('email').value = email;
+        document.getElementById('password').value = password;
         
-        // Déclencher la soumission après un petit délai pour l'animation
-        setTimeout(() => {
-            loginForm.dispatchEvent(new Event('submit'));
-        }, 500);
-    }
-};
-
+        // Simuler la soumission du formulaire
+        const loginForm = document.getElementById('login-form');
+        if (loginForm) {
+            // Animation visuelle
+            const button = document.querySelector('.login-button-submit');
+            if (button) {
+                button.textContent = 'Connexion en cours...';
+                button.classList.add('loading');
+            }
+            
+            // Déclencher la soumission après un petit délai pour l'animation
+            setTimeout(() => {
+                loginForm.dispatchEvent(new Event('submit'));
+            }, 500);
+        }
+    };
 
     // -----------------------------------------
     // PAGE LOGIN : gestion formulaire connexion + erreurs
@@ -111,20 +110,22 @@ window.quickLogin = function(email, password) {
     // -----------------------------------------
     const placesList = document.getElementById('places-list');
     const priceFilter = document.getElementById('price-filter');
+
     if (placesList && priceFilter) {
+        // Options pour l'authentification si connecté
         const options = jwt ? { 
             headers: { 'Authorization': 'Bearer ' + jwt },
             credentials: 'include'
         } : {};
 
+        // Appel API simple
         fetch('http://localhost:5001/api/v1/places/', options)
-            .then(resp => {
-                if (!resp.ok) throw new Error(`Erreur API (${resp.status}): ${resp.statusText}`);
-                return resp.json();
-            })
+            .then(response => response.json())
             .then(places => {
+                // Vider la liste
                 placesList.innerHTML = '';
 
+                // Créer une carte pour chaque lieu
                 places.forEach(place => {
                     const card = document.createElement('div');
                     card.className = 'place-card';
@@ -139,39 +140,23 @@ window.quickLogin = function(email, password) {
                     placesList.appendChild(card);
                 });
 
-                const uniqPrices = Array.from(new Set(places.map(p => p.price_by_night))).sort((a, b) => a - b);
-                priceFilter.innerHTML = `<option value="">Tous</option>` +
-                    uniqPrices.map(prix => `<option value="${prix}">≤ ${prix} €</option>`).join('');
+                // Créer les options de filtre prix
+                const prices = [...new Set(places.map(p => p.price_by_night))].sort((a, b) => a - b);
+                priceFilter.innerHTML = '<option value="">Tous</option>' + 
+                    prices.map(price => `<option value="${price}">≤ ${price} €</option>`).join('');
 
+                // Gestion du filtre
                 priceFilter.addEventListener('change', () => {
-                    const max = Number(priceFilter.value);
-                    const cards = placesList.querySelectorAll('.place-card');
-                    let nbVisible = 0;
-
-                    cards.forEach(card => {
-                        const price = Number(card.dataset.price);
-                        const visible = !max || price <= max;
-                        card.style.display = visible ? '' : 'none';
-                        if (visible) nbVisible++;
+                    const maxPrice = Number(priceFilter.value);
+                    document.querySelectorAll('.place-card').forEach(card => {
+                        const cardPrice = Number(card.dataset.price);
+                        card.style.display = (!maxPrice || cardPrice <= maxPrice) ? '' : 'none';
                     });
-
-                    let msg = document.getElementById('msg-vide');
-                    if (nbVisible === 0) {
-                        if (!msg) {
-                            msg = document.createElement('p');
-                            msg.id = 'msg-vide';
-                            msg.textContent = "Aucun lieu ne correspond à ce critère.";
-                            msg.style.color = "gray";
-                            placesList.appendChild(msg);
-                        }
-                    } else if (msg) {
-                        msg.remove();
-                    }
                 });
             })
-            .catch(err => {
-                placesList.innerHTML = `<p>Erreur lors du chargement des lieux : ${err.message}</p>`;
-                console.error(err);
+            .catch(error => {
+                placesList.innerHTML = '<p>Erreur de chargement des lieux</p>';
+                console.error('Erreur:', error);
             });
     }
 
@@ -423,13 +408,13 @@ window.quickLogin = function(email, password) {
                     createPlaceError.style.display = 'block';
                 }
             } finally {
-                    const submitButton = createPlaceForm.querySelector('button[type="submit"]');
-                    const originalText = 'Créer le lieu';
+                const submitButton = createPlaceForm.querySelector('button[type="submit"]');
+                const originalText = 'Créer le lieu';
                 if (submitButton) {
                     submitButton.disabled = false;
                     submitButton.textContent = originalText;
-    }
-}
+                }
+            }
         });
     }
 
@@ -687,9 +672,6 @@ window.quickLogin = function(email, password) {
             console.error('Erreur décodage JWT:', e);
         }
 
-        // Toutes les autres fonctions edit-place sont identiques à ton code...
-        // Je vais les inclure mais raccourcir pour la lisibilité
-
         async function loadPlaceData() {
             try {
                 editPlaceLoading.style.display = 'block';
@@ -737,17 +719,15 @@ window.quickLogin = function(email, password) {
             }
         }
 
-        // Reste du code edit-place identique...
-        // [Je peux développer si nécessaire]
-
         loadPlaceData();
     }
 
     // -----------------------------------------
-    // PAGE DETAILS (place.html) : infos lieu, avis, formulaire avis
+    // ✅ PAGE DETAILS (place.html) : infos lieu, avis, formulaire avis - VERSION AMÉLIORÉE
     // -----------------------------------------
-    const placeDetailsSection = document.querySelector('.place-details');
-    if (placeDetailsSection) {
+    const placeDetailsSection = document.querySelector('.place-card-main');
+    if (placeDetailsSection || document.getElementById('place-loading')) {
+        
         function getPlaceIdFromUrl() {
             const params = new URLSearchParams(window.location.search);
             return params.get('id');
@@ -755,9 +735,63 @@ window.quickLogin = function(email, password) {
         
         const placeId = getPlaceIdFromUrl();
         if (!placeId) {
-            const placeInfo = document.querySelector('.place-info');
-            if (placeInfo) placeInfo.innerHTML = "<p>Lieu inconnu</p>";
+            document.querySelector('.container').innerHTML = `
+                <div style="text-align: center; margin-top: 50px;">
+                    <h2>Lieu introuvable</h2>
+                    <p>Aucun identifiant de lieu fourni.</p>
+                    <a href="index.html" style="color: #007bff;">Retour à l'accueil</a>
+                </div>
+            `;
             return;
+        }
+
+        // ✅ FONCTION LOADREVIEWS AMÉLIORÉE INTÉGRÉE
+        function loadReviews() {
+            console.log('💬 Chargement des avis...');
+            
+            const fetchOptions = jwt ? { 
+                headers: { 'Authorization': 'Bearer ' + jwt },
+                credentials: 'include'
+            } : {};
+            
+            fetch(`http://localhost:5001/api/v1/places/${placeId}/reviews/`, fetchOptions)
+                .then(resp => resp.json())
+                .then(reviews => {
+                    const listDiv = document.getElementById('review-list');
+                    if (!listDiv) return;
+                    
+                    listDiv.innerHTML = '';
+                    
+                    if (reviews.length === 0) {
+                        listDiv.innerHTML = `
+                            <div class="no-reviews" style="text-align: center; padding: 40px; background: #f8f9fa; border-radius: 10px; margin: 20px 0;">
+                                <div style="font-size: 3rem; margin-bottom: 15px;">💭</div>
+                                <h3 style="color: #6c757d; margin-bottom: 10px;">Aucun avis pour le moment</h3>
+                                <p style="color: #6c757d;">Soyez le premier à partager votre expérience !</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    reviews.forEach(rv => {
+                        const reviewCard = document.createElement('div');
+                        reviewCard.className = 'review-card';
+                        reviewCard.innerHTML = `
+                            <div class="review-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span class="review-user" style="font-weight: 600; color: #333;">👤 ${rv.user_name || "Utilisateur inconnu"}</span>
+                                <span class="review-rating" style="background: #ffc107; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">⭐ ${rv.rating}/5</span>
+                            </div>
+                            <p class="review-comment" style="color: #555; line-height: 1.5; margin: 0;">${rv.text}</p>
+                        `;
+                        listDiv.appendChild(reviewCard);
+                    });
+                })
+                .catch(err => {
+                    const listDiv = document.getElementById('review-list');
+                    if (listDiv) {
+                        listDiv.innerHTML = `<p style="color: #dc3545; text-align: center; padding: 20px;">Erreur chargement des avis : ${err.message}</p>`;
+                    }
+                });
         }
 
         function fetchPlaceAndReviews() {
@@ -766,59 +800,59 @@ window.quickLogin = function(email, password) {
                 credentials: 'include'
             } : {};
 
+            // Chargement des détails du lieu
             fetch(`http://localhost:5001/api/v1/places/${placeId}`, fetchOptions)
                 .then(resp => {
                     if (!resp.ok) throw new Error("Lieu introuvable");
                     return resp.json();
                 })
                 .then(place => {
+                    console.log('✅ Lieu chargé:', place);
+
+                    // Masquer le loading et afficher le contenu
+                    const loadingEl = document.getElementById('place-loading');
+                    const cardEl = document.querySelector('.place-card-main');
+                    
+                    if (loadingEl) loadingEl.style.display = 'none';
+                    if (cardEl) cardEl.style.display = 'block';
+
+                    // Remplir les informations du lieu
                     const infoDiv = document.querySelector('.place-info');
                     if (infoDiv) {
                         infoDiv.innerHTML = `
-                            <h1>${place.name} (${place.city_name || ""})</h1>
+                            <h1>${place.name}</h1>
                             <p>Hébergé par <span class="host">${place.host_name || "Inconnu"}</span></p>
-                            <p class="place-price">Prix : ${place.price_by_night} €/nuit</p>
-                            <p>Description : ${place.description || ''}</p>
-                            <ul>
-                                ${(place.amenities || []).map(am => `<li>${am.name}</li>`).join('')}
-                            </ul>
+                            <p class="place-price">${place.price_by_night} €/nuit</p>
+                            <p><strong>Description :</strong> ${place.description || 'Aucune description'}</p>
+                            <div class="amenities">
+                                <strong>Équipements :</strong>
+                                <ul>
+                                    ${(place.amenities || []).map(am => `<li>${am.name}</li>`).join('')}
+                                </ul>
+                            </div>
                         `;
                     }
-                })
-                .catch(err => {
-                    const infoDiv = document.querySelector('.place-info');
-                    if (infoDiv) infoDiv.innerHTML = `<p>${err.message}</p>`;
-                });
 
-            fetch(`http://localhost:5001/api/v1/places/${placeId}/reviews/`, fetchOptions)
-                .then(resp => resp.json())
-                .then(reviews => {
-                    const listDiv = document.getElementById('review-list');
-                    if (!listDiv) return;
-                    listDiv.innerHTML = '';
-                    if (reviews.length === 0) {
-                        listDiv.innerHTML = "<p>Aucun avis pour ce lieu.</p>";
-                        return;
-                    }
-                    reviews.forEach(rv => {
-                        const reviewCard = document.createElement('div');
-                        reviewCard.className = 'review-card';
-                        reviewCard.innerHTML = `
-                            <p class="review-comment">${rv.text}</p>
-                            <p class="review-user">Par ${rv.user_name || "Utilisateur inconnu"}</p>
-                            <p class="review-rating">Note : ${rv.rating}/5</p>
-                        `;
-                        listDiv.appendChild(reviewCard);
-                    });
+                    // ✅ APPELER LA FONCTION LOADREVIEWS AMÉLIORÉE
+                    loadReviews();
                 })
                 .catch(err => {
-                    const listDiv = document.getElementById('review-list');
-                    if (listDiv) listDiv.innerHTML = `<p>Erreur chargement des avis : ${err.message}</p>`;
+                    console.error('❌ Erreur:', err);
+                    const loadingEl = document.getElementById('place-loading');
+                    const errorEl = document.getElementById('place-error');
+                    
+                    if (loadingEl) loadingEl.style.display = 'none';
+                    if (errorEl) {
+                        errorEl.textContent = err.message;
+                        errorEl.style.display = 'block';
+                    }
                 });
         }
         
+        // Charger immédiatement
         fetchPlaceAndReviews();
 
+        // Gestion du formulaire d'avis
         const addReviewSection = document.getElementById('add-review');
         const reviewForm = document.getElementById('review-form');
 
@@ -844,7 +878,7 @@ window.quickLogin = function(email, password) {
                             'Content-Type': 'application/json',
                             'Authorization': 'Bearer ' + jwt
                         },
-                        body: JSON.stringify({ text, rating })
+                        body: JSON.stringify({ text, rating: parseInt(rating) })
                     })
                         .then(resp => {
                             if (!resp.ok) throw new Error("Erreur lors de l'envoi de l'avis.");
@@ -852,7 +886,8 @@ window.quickLogin = function(email, password) {
                         })
                         .then(() => {
                             reviewForm.reset();
-                            fetchPlaceAndReviews();
+                            // Recharger les avis avec la fonction améliorée
+                            loadReviews();
                         })
                         .catch(err => {
                             alert(err.message || "Erreur inconnue");
@@ -861,7 +896,10 @@ window.quickLogin = function(email, password) {
             }
         } else if (addReviewSection) {
             addReviewSection.innerHTML = `
-                <a href="login.html" style="color: #007bff;">Connectez-vous pour laisser un avis</a>
+                <div class="login-prompt-content">
+                    <h3>💬 Connectez-vous pour laisser un avis</h3>
+                    <a href="login.html" class="btn btn-primary">Se connecter</a>
+                </div>
             `;
         }
     }
