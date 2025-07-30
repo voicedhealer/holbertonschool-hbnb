@@ -4,6 +4,8 @@ from flask_jwt_extended import jwt_required, get_jwt
 
 api = Namespace('places', description='Place operations')
 
+
+# Modèles pour Swagger / validation
 amenity_model = api.model('PlaceAmenity', {
     'id': fields.String(),
     'name': fields.String()
@@ -47,11 +49,12 @@ place_output_model = api.model('PlaceOut', {
     'reviews': fields.List(fields.Nested(review_model))
 })
 
+
 def place_to_dict(place, details=True):
     host_name = "Inconnu"
     if hasattr(place, 'owner') and place.owner:
         host_name = f"{place.owner.first_name} {place.owner.last_name}".strip()
-    
+
     data = {
         'id': str(place.id),
         'name': place.title,
@@ -63,7 +66,7 @@ def place_to_dict(place, details=True):
         'host_name': host_name,
         'city_name': getattr(place, 'city_name', ''),
     }
-    
+
     if details:
         if hasattr(place, 'owner') and place.owner:
             data['owner'] = {
@@ -74,7 +77,7 @@ def place_to_dict(place, details=True):
             }
         else:
             data['owner'] = None
-            
+
         if hasattr(place, 'amenities'):
             data['amenities'] = [
                 {'id': str(pa.amenity.id), 'name': pa.amenity.name}
@@ -83,7 +86,7 @@ def place_to_dict(place, details=True):
             ]
         else:
             data['amenities'] = []
-            
+
         if hasattr(place, 'reviews'):
             data['reviews'] = [
                 {
@@ -98,6 +101,7 @@ def place_to_dict(place, details=True):
             data['reviews'] = []
     return data
 
+
 @api.route('/')
 class PlaceList(Resource):
     @api.expect(place_model, validate=True)
@@ -108,16 +112,13 @@ class PlaceList(Resource):
         data = api.payload
         from flask_jwt_extended import get_jwt_identity
 
-        # ✅ RÉCUPÉRER L'USER_ID DEPUIS LE JWT
         current_user_id = get_jwt_identity()
         if not current_user_id:
             return {'error': 'User identification failed'}, 401
-        
-        # ✅ RÉCUPÉRER LES DONNÉES ET AJOUTER L'OWNER_ID
+
         data = api.payload.copy()
         data['owner_id'] = current_user_id
 
-        # Vérification unicité géolocalisation
         latitude = data.get('latitude')
         longitude = data.get('longitude')
 
@@ -135,8 +136,10 @@ class PlaceList(Resource):
         places = HBnBFacade().get_all_places()
         return [place_to_dict(p) for p in places], 200
 
+
 @api.route('/<place_id>')
 class PlaceResource(Resource):
+    @api.marshal_with(place_output_model)
     def get(self, place_id):
         place = HBnBFacade().get_place(place_id)
         if not place:
@@ -160,7 +163,6 @@ class PlaceResource(Resource):
 
         data = api.payload
 
-        # Éviter de modifier la géolocalisation vers un lieu déjà existant
         new_lat = data.get('latitude', place.latitude)
         new_lon = data.get('longitude', place.longitude)
         if (new_lat != place.latitude or new_lon != place.longitude):
@@ -177,16 +179,67 @@ class PlaceResource(Resource):
             return {'error': 'Place not found'}, 404
         return place_to_dict(updated_place), 200
 
-# ✅ NOUVELLE ROUTE AJOUTÉE POUR RÉSOUDRE L'ERREUR 404 DES REVIEWS
+    # --- AJOUT DE LA MÉTHODE DELETE ---
+    @jwt_required()
+    @api.response(200, 'Place deleted successfully')
+    @api.response(404, 'Place not found')
+    @api.response(403, 'Unauthorized')
+    def delete(self, place_id):
+        """
+        Delete a place (only owner allowed)
+        """
+        facade = HBnBFacade()
+
+        place = facade.get_place(place_id)
+        if not place:
+            return {'error': 'Place not found'}, 404
+
+        user_claims = get_jwt()
+        current_user_id = user_claims.get('sub')
+        if not current_user_id or str(place.owner_id) != str(current_user_id):
+            return {'error': 'Unauthorized - You can only delete your own places'}, 403
+
+        try:
+            facade.delete_place(place_id)
+            return {'message': 'Place deleted successfully'}, 200
+        except Exception as e:
+            return {'error': str(e)}, 500
+
+
+@api.route('/<place_id>/amenities')
+class PlaceAmenities(Resource):
+    @api.expect(amenity_model)
+    @api.response(200, 'Amenities added successfully')
+    @api.response(404, 'Place not found')
+    @api.response(400, 'Invalid input data')
+    def post(self, place_id):
+        amenities_data = api.payload
+        if not amenities_data or len(amenities_data) == 0:
+            return {'error': 'Invalid input data'}, 400
+
+        place = HBnBFacade().get_place(place_id)
+        if not place:
+            return {'error': 'Place not found'}, 404
+
+        for amenity in amenities_data:
+            a = HBnBFacade().get_amenity(amenity['id'])
+            if not a:
+                return {'error': 'Invalid input data'}, 400
+
+        for amenity in amenities_data:
+            place.add_amenity(amenity)
+        return {'message': 'Amenities added successfully'}, 200
+
+
 @api.route('/<place_id>/reviews/')
 class PlaceReviewsList(Resource):
     def get(self, place_id):
-        """Récupère tous les avis d'un lieu"""
+        """Get all reviews for a place"""
         reviews = HBnBFacade().get_reviews_by_place(place_id)
         if reviews is None:
             return {'error': 'Place not found'}, 404
-        
-        # Formatage des reviews avec user_name pour le frontend
+
+        # Formatage reviews
         formatted_reviews = []
         for review in reviews:
             review_data = {
@@ -196,8 +249,7 @@ class PlaceReviewsList(Resource):
                 'user_id': str(review.user_id),
                 'user_name': "Utilisateur inconnu"
             }
-            
-            # Récupération du nom d'utilisateur
+
             if hasattr(review, 'user') and review.user:
                 review_data['user_name'] = f"{review.user.first_name} {review.user.last_name}".strip()
             else:
@@ -207,36 +259,32 @@ class PlaceReviewsList(Resource):
                         review_data['user_name'] = f"{user.first_name} {user.last_name}".strip()
                 except:
                     pass
-            
+
             formatted_reviews.append(review_data)
-        
+
         return formatted_reviews, 200
-    
+
     @api.expect({'text': fields.String(required=True), 'rating': fields.Integer(required=True)})
     @jwt_required()
     def post(self, place_id):
-        """Créer un avis pour un lieu spécifique"""
         claims = get_jwt()
         current_user_id = claims.get('sub')
-        
+
         data = api.payload
-        
-        # Validation basique
+
         if not data.get('text') or not data.get('rating'):
             return {'error': 'Text and rating are required'}, 400
-        
-        # Ajout automatique des IDs depuis le JWT et l'URL
+
         review_data = {
             'text': data['text'],
             'rating': int(data['rating']),
             'user_id': current_user_id,
             'place_id': place_id
         }
-        
+
         try:
             review = HBnBFacade().create_review(review_data)
-            
-            # Formatage de la réponse pour le frontend
+
             review_response = {
                 'id': str(review.id),
                 'text': review.text,
@@ -244,15 +292,14 @@ class PlaceReviewsList(Resource):
                 'user_id': str(review.user_id),
                 'user_name': "Utilisateur inconnu"
             }
-            
-            # Récupération du nom d'utilisateur pour l'affichage
+
             try:
                 user = HBnBFacade().get_user(current_user_id)
                 if user:
                     review_response['user_name'] = f"{user.first_name} {user.last_name}".strip()
             except:
                 pass
-            
+
             return review_response, 201
         except Exception as e:
             return {'error': str(e)}, 400

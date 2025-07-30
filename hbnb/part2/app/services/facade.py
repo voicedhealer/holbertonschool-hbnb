@@ -1,79 +1,4 @@
-<<<<<<< HEAD
-from app.persistence.repository import SQLAlchemyRepository 
-=======
-<<<<<<< HEAD
-from typing import List, Optional, TYPE_CHECKING
-from app.models.base import BaseModel
-from app.persistence.repository import Repository
-
-# Pour éviter les importations circulaires tout en gardant le type hinting
-if TYPE_CHECKING:
-    from app.models.user import User
-    from app.models.review import Review
-    from app.models.amenity import Amenity
-
-class Place(BaseModel):
-    """
-    Représente un lieu ou un logement disponible dans l'application.
-    """
-
-    def __init__(
-        self,
-        title: str,
-        description: str,
-        city: str,
-        price: float,
-        latitude: float,
-        longitude: float,
-        name: str,
-        owner_id: str,
-        reviews: Optional[List['Review']] = None,
-        address: Optional[str] = None,
-        amenities: Optional[List['Amenity']] = None
-    ):
-        super().__init__()
-        self.title = title
-        self.description = description
-        self.city = city
-        self.price = price
-        self.latitude = latitude
-        self.longitude = longitude
-        self.name = name
-        self.address = address
-        self.reviews = reviews if reviews is not None else []
-        self.amenities = amenities if amenities is not None else []
-
-        # Convertir owner_id → objet owner (User)
-        repo = UserRepository()
-        user_obj = repo.get(owner_id)
-        if user_obj is None:
-            raise ValueError(f"Aucun utilisateur trouvé avec l'ID {owner_id}")
-        self.owner = user_obj
-
-    def add_review(self, review: 'Review') -> None:
-        self.reviews.append(review)
-
-    def add_amenity(self, amenity: 'Amenity') -> None:
-        self.amenities.append(amenity)
-
-    def to_dict(self):
-        """Retourne un dictionnaire représentant le lieu."""
-        return {
-            'id': str(self.id),
-            'title': self.title,
-            'description': self.description,
-            'city': self.city,
-            'price': self.price,
-            'latitude': self.latitude,
-            'longitude': self.longitude,
-            'name': self.name,
-            'owner_id': self.owner.id if self.owner else None,
-            'address': self.address,
-            'amenities': [a.id for a in self.amenities] if self.amenities else [],
-        }
-=======
-from app.persistence.repository import InMemoryRepository
->>>>>>> 3224cf57b177e7af7e0b73f9684d2a80d1800319
+from app.persistence.repository import SQLAlchemyRepository
 from app.models.user import User
 from app.models.amenity import Amenity
 from app.models.place import Place
@@ -86,13 +11,14 @@ class HBnBFacade:
         self.place_repo = SQLAlchemyRepository(Place)
         self.review_repo = SQLAlchemyRepository(Review)
 
+    # ---------- USER ----------
     def create_user(self, user_data):
         password = user_data.pop('password')
         user = User(**user_data)
         user.hash_password(password)
         self.user_repo.add(user)
         return user
-    
+
     def get_users(self):
         return self.user_repo.get_all()
 
@@ -101,11 +27,11 @@ class HBnBFacade:
 
     def get_user_by_email(self, email):
         return self.user_repo.get_by_attribute('email', email)
-    
+
     def update_user(self, user_id, user_data):
         self.user_repo.update(user_id, user_data)
-    
-    # AMENITY
+
+    # ---------- AMENITY ----------
     def create_amenity(self, amenity_data):
         amenity = Amenity(**amenity_data)
         self.amenity_repo.add(amenity)
@@ -120,25 +46,34 @@ class HBnBFacade:
     def update_amenity(self, amenity_id, amenity_data):
         self.amenity_repo.update(amenity_id, amenity_data)
 
-    # PLACE
+    # ---------- PLACE ----------
     def create_place(self, place_data):
-        user = self.user_repo.get_by_attribute('id', place_data['owner_id'])
-        if not user:
-            raise KeyError('Invalid input data')
-        del place_data['owner_id']
-        place_data['owner'] = user
-        amenities = place_data.pop('amenities', None)
-        if amenities:
-            for a in amenities:
-                amenity = self.get_amenity(a['id'])
-                if not amenity:
-                    raise KeyError('Invalid input data')
+        # 1. Vérification owner
+        owner = self.user_repo.get_by_attribute('id', place_data['owner_id'])
+        if not owner:
+            raise KeyError('Invalid owner_id')
+        
+        # 2. Amenities: charger les objets
+        amenities = []
+        amenities_ids = place_data.pop('amenities', [])  # Liste d'ID d'amenities
+        for am_id in amenities_ids:
+            amenity = self.get_amenity(am_id)
+            if not amenity:
+                raise KeyError(f'Invalid amenity id: {am_id}')
+            amenities.append(amenity)
+
+        # 3. Création de la Place (sans owner_id mais owner object, normalisé)
+        place_data['owner'] = owner
         place = Place(**place_data)
         self.place_repo.add(place)
-        user.add_place(place)
-        if amenities:
-            for amenity in amenities:
-                place.add_amenity(amenity)
+        
+        # 4. Ajout amenities à la place (si méthode appropriée)
+        for amenity in amenities:
+            place.add_amenity(amenity)
+        
+        # 5. Ajout place à l'owner si logique
+        if hasattr(owner, "add_place"):
+            owner.add_place(place)
         return place
 
     def get_place(self, place_id):
@@ -150,26 +85,35 @@ class HBnBFacade:
     def update_place(self, place_id, place_data):
         self.place_repo.update(place_id, place_data)
 
-    # REVIEWS
-    def create_review(self, review_data):
-        user = self.user_repo.get(review_data['user_id'])
-        if not user:
-            raise KeyError('Invalid input data')
-        del review_data['user_id']
-        review_data['user'] = user
-        
-        place = self.place_repo.get(review_data['place_id'])
+    def delete_place(self, place_id):
+        place = self.get_place(place_id)
         if not place:
-            raise KeyError('Invalid input data')
-        del review_data['place_id']
-        review_data['place'] = place
+            raise ValueError("Place not found")
+        # Détacher des owner/amenity/review si logique d'ORM le requiert (cascade ?)
+        owner = place.owner
+        if hasattr(owner, "remove_place"):
+            owner.remove_place(place)
+        # Suppression directe
+        self.place_repo.delete(place_id)
 
+    # ---------- REVIEW ----------
+    def create_review(self, review_data):
+        user = self.user_repo.get_by_attribute('id', review_data['user_id'])
+        if not user:
+            raise KeyError('Invalid user_id')
+        place = self.place_repo.get_by_attribute('id', review_data['place_id'])
+        if not place:
+            raise KeyError('Invalid place_id')
+        review_data['user'] = user
+        review_data['place'] = place
         review = Review(**review_data)
         self.review_repo.add(review)
-        user.add_review(review)
-        place.add_review(review)
+        if hasattr(user, "add_review"):
+            user.add_review(review)
+        if hasattr(place, "add_review"):
+            place.add_review(review)
         return review
-        
+
     def get_review(self, review_id):
         return self.review_repo.get(review_id)
 
@@ -180,18 +124,19 @@ class HBnBFacade:
         place = self.place_repo.get(place_id)
         if not place:
             raise KeyError('Place not found')
-        return place.reviews
+        return getattr(place, "reviews", [])
 
     def update_review(self, review_id, review_data):
         self.review_repo.update(review_id, review_data)
 
     def delete_review(self, review_id):
         review = self.review_repo.get(review_id)
-        
-        user = self.user_repo.get(review.user.id)
-        place = self.place_repo.get(review.place.id)
-
-        user.delete_review(review)
-        place.delete_review(review)
+        if not review:
+            raise ValueError('Review not found')
+        user = review.user
+        place = review.place
+        if hasattr(user, "remove_review"):
+            user.remove_review(review)
+        if hasattr(place, "remove_review"):
+            place.remove_review(review)
         self.review_repo.delete(review_id)
->>>>>>> e3aae9bdad1665e905a72014d83d2429b964e26c

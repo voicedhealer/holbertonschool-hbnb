@@ -48,6 +48,26 @@ class HBnBFacade:
         db.session.commit()
         return user
 
+    # ✅ NOUVELLE MÉTHODE DELETE USER (optionnelle)
+    def delete_user(self, user_id):
+        """Supprimer un utilisateur (avec ses lieux et avis)"""
+        user = self.get_user(user_id)
+        if not user:
+            raise ValueError("User not found")
+        
+        # Supprimer les lieux de l'utilisateur (et leurs relations)
+        user_places = Place.query.filter_by(owner_id=user_id).all()
+        for place in user_places:
+            self.delete_place(place.id)
+        
+        # Supprimer les avis de l'utilisateur
+        Review.query.filter_by(user_id=user_id).delete()
+        
+        # Supprimer l'utilisateur
+        db.session.delete(user)
+        db.session.commit()
+        return True
+
     # ---------- AMENITY ----------
     def create_amenity(self, data):
         Amenity.validate_data(data)
@@ -77,6 +97,21 @@ class HBnBFacade:
             amenity.name = data['name']
         db.session.commit()
         return amenity
+
+    # ✅ NOUVELLE MÉTHODE DELETE AMENITY (optionnelle)
+    def delete_amenity(self, amenity_id):
+        """Supprimer un équipement (et ses relations avec les lieux)"""
+        amenity = self.get_amenity(amenity_id)
+        if not amenity:
+            raise ValueError("Amenity not found")
+        
+        # Supprimer les relations avec les lieux
+        PlaceAmenity.query.filter_by(amenity_id=amenity_id).delete()
+        
+        # Supprimer l'équipement
+        db.session.delete(amenity)
+        db.session.commit()
+        return True
 
     # ---------- PLACE ----------
     def create_place(self, data):
@@ -143,6 +178,33 @@ class HBnBFacade:
         db.session.commit()
         return place
 
+    # ✅ NOUVELLE MÉTHODE DELETE PLACE - LA PLUS IMPORTANTE !
+    def delete_place(self, place_id):
+        """Supprimer un lieu par son ID avec toutes ses relations"""
+        place = self.get_place(place_id)
+        if not place:
+            raise ValueError("Place not found")
+        
+        try:
+            # 1. Supprimer les relations avec les équipements
+            PlaceAmenity.query.filter_by(place_id=place_id).delete()
+            
+            # 2. Supprimer les avis du lieu
+            Review.query.filter_by(place_id=place_id).delete()
+            
+            # 3. Supprimer le lieu lui-même
+            db.session.delete(place)
+            
+            # 4. Confirmer toutes les suppressions
+            db.session.commit()
+            
+            return True
+            
+        except Exception as e:
+            # Annuler en cas d'erreur
+            db.session.rollback()
+            raise ValueError(f"Error deleting place: {str(e)}")
+
     def find_place_by_location(self, latitude, longitude, delta=1e-7):
         return Place.query.filter(
             db.func.abs(Place.latitude - latitude) < delta,
@@ -193,3 +255,14 @@ class HBnBFacade:
             review.rating = int(rating)
         db.session.commit()
         return review
+
+    # ✅ NOUVELLE MÉTHODE DELETE REVIEW
+    def delete_review(self, review_id):
+        """Supprimer un avis par son ID"""
+        review = self.get_review(review_id)
+        if not review:
+            raise ValueError("Review not found")
+        
+        db.session.delete(review)
+        db.session.commit()
+        return True
