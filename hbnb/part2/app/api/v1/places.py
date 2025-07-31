@@ -81,7 +81,7 @@ class PlaceList(Resource):
         """Register a new place (propriétaire uniquement)"""
         current_user = get_current_user()
         place_data = api.payload
-        place_data["owner_id"] = current_user["id"]  # owner_id vient toujours du token, JAMAIS du front
+        place_data["owner_id"] = current_user["id"]
         try:
             new_place = facade.create_place(place_data)
             return new_place.to_dict(), 201

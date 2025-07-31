@@ -89,6 +89,7 @@ class HBnBFacade:
             db.session.rollback()
             raise e
 
+
     # ---------- AMENITY ----------
     def create_amenity(self, amenity_data):
         """Création d'une amenité"""
@@ -147,8 +148,8 @@ class HBnBFacade:
             if not owner:
                 raise ValueError(f'Invalid owner_id: {owner_id}')
             
-            # ✅ Vérification que l'owner est bien propriétaire
-            if owner.role != 'owner':
+            # Vérification que l'owner est bien propriétaire
+            if owner_id.role != 'owner':
                 raise ValueError('User must have owner role to create places')
             
             # 2. Amenities: charger les objets

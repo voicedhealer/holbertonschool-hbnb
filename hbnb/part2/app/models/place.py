@@ -82,7 +82,7 @@ class Place(BaseModel):
     def add_amenity(self, amenity):
         """Add an amenity to the place."""
         self.amenities.append(amenity)
-
+        
     def to_dict(self):
         return {
             'id': self.id,
