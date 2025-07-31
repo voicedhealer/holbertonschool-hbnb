@@ -66,7 +66,7 @@ if (jwt) {
         const tokenParts = jwt.split('.');
         const payload = JSON.parse(atob(tokenParts[1]));
         
-        // ✅ DEBUG COMPLET pour identifier le problème
+        // DEBUG COMPLET pour identifier le problème
         console.log('=== DEBUG NAVIGATION SCRIPTS.JS ===');
         console.log('Payload JWT:', payload);
         console.log('Rôle brut:', payload.role);
@@ -75,19 +75,19 @@ if (jwt) {
         
         const userRole = payload.role;
         
-        // ✅ VÉRIFICATION ROBUSTE DU RÔLE PROPRIÉTAIRE
+        // VÉRIFICATION ROBUSTE DU RÔLE PROPRIÉTAIRE
         if (isOwner(userRole)) {
-            console.log('✅ Utilisateur reconnu comme propriétaire');
+            console.log('Utilisateur reconnu comme propriétaire');
             addOwnerNavigation();
         } else {
-            console.log('❌ Utilisateur non reconnu comme propriétaire. Rôle:', userRole);
+            console.log('Utilisateur non reconnu comme propriétaire. Rôle:', userRole);
         }
     } catch (e) {
         console.error('Erreur décodage JWT pour navigation:', e);
     }
 }
 
-// ✅ FONCTION UNIVERSELLE DE VÉRIFICATION DU RÔLE
+// FONCTION UNIVERSELLE DE VÉRIFICATION DU RÔLE
 function isOwner(role) {
     if (!role) {
         console.log('Rôle vide ou undefined');
@@ -113,10 +113,10 @@ function addOwnerNavigation() {
         ownerLinks.className = 'owner-navigation';
         ownerLinks.innerHTML = `
             <a href="create-place.html" class="nav-link owner-link">
-                ➕ Créer un lieu
+                Créer un lieu
             </a>
             <a href="my-places.html" class="nav-link owner-link">
-                🏠 Mes lieux
+                 Mes lieux
             </a>
         `;
         
@@ -132,11 +132,11 @@ function addOwnerNavigation() {
             }
         }
         
-        console.log('✅ Liens propriétaire ajoutés avec succès');
+        console.log('Liens propriétaire ajoutés avec succès');
     } else if (document.getElementById('owner-nav-added')) {
-        console.log('ℹ️ Liens propriétaire déjà présents');
+        console.log('Liens propriétaire déjà présents');
     } else {
-        console.log('❌ Navigation container non trouvé');
+        console.log('Navigation container non trouvé');
     }
 }
 
@@ -242,7 +242,7 @@ if (registerForm) {
             if (response.ok) {
                 const data = await response.json();
                 
-                // ✅ CONNEXION AUTOMATIQUE après inscription
+                // CONNEXION AUTOMATIQUE après inscription
                 try {
                     if (registerSuccess) {
                         registerSuccess.textContent = 'Inscription réussie ! Connexion automatique...';
@@ -254,7 +254,7 @@ if (registerForm) {
                         credentials: 'include',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            username: formData.email, // Utilise l'email comme username
+                            username: formData.email,
                             password: formData.password
                         })
                     });
@@ -640,7 +640,7 @@ if (registerForm) {
     }
 
     // ---------------------------------------------------------------------
-    // ✅ PAGE MES LIEUX (my-places.html) - MAINTENANT DANS DOMContentLoaded
+    // PAGE MES LIEUX (my-places.html) - MAINTENANT DANS DOMContentLoaded
     // ---------------------------------------------------------------------
     const myPlacesList = document.getElementById('my-places-list');
     const myPlacesStats = document.getElementById('my-places-stats');
@@ -694,7 +694,7 @@ if (registerForm) {
                 }
                 
             } catch (error) {
-                console.error('❌ Erreur chargement mes lieux:', error);
+                console.error(' Erreur chargement mes lieux:', error);
                 myPlacesList.innerHTML = '';
                 if (myPlacesError) {
                     myPlacesError.textContent = `Erreur: ${error.message}`;
@@ -831,7 +831,7 @@ if (registerForm) {
                 loadMyPlaces();
 
             } catch (error) {
-                console.error('❌ Erreur suppression:', error);
+                console.error('Erreur suppression:', error);
                 if (myPlacesError) {
                     myPlacesError.textContent = `Erreur suppression: ${error.message}`;
                     myPlacesError.style.display = 'block';
@@ -846,7 +846,7 @@ if (registerForm) {
     }
 
     // -----------------------------------------------------------------------
-    // ✅ PAGE EDIT PLACE (edit-place.html) - MAINTENANT DANS DOMContentLoaded  
+    // PAGE EDIT PLACE (edit-place.html) - MAINTENANT DANS DOMContentLoaded  
     // -----------------------------------------------------------------------
     const editPlaceForm = document.getElementById('edit-place-form');
     const editPlaceError = document.getElementById('edit-place-error');
@@ -927,7 +927,7 @@ if (registerForm) {
                 editPlaceForm.style.display = 'block';
 
             } catch (error) {
-                console.error('❌ Erreur chargement lieu:', error);
+                console.error('Erreur chargement lieu:', error);
                 editPlaceLoading.style.display = 'none';
                 
                 document.body.innerHTML = `
@@ -943,9 +943,9 @@ if (registerForm) {
         loadPlaceData();
     }
 
-    // -----------------------------------------
-    // ✅ PAGE DETAILS (place.html) : infos lieu, avis, formulaire avis - VERSION AMÉLIORÉE
-    // -----------------------------------------
+    // -------------------------------------------------------------
+    // PAGE DETAILS (place.html) : infos lieu, avis, formulaire avis
+    // ------------------------------------------------------------
     const placeDetailsSection = document.querySelector('.place-card-main');
     if (placeDetailsSection || document.getElementById('place-loading')) {
         
@@ -967,7 +967,7 @@ if (registerForm) {
         }
 
         function loadReviews() {
-            console.log('💬 Chargement des avis...');
+            console.log('Chargement des avis...');
             
             const fetchOptions = jwt ? { 
                 headers: { 'Authorization': 'Bearer ' + jwt },
@@ -1027,7 +1027,7 @@ if (registerForm) {
                     return resp.json();
                 })
                 .then(place => {
-                    console.log('✅ Lieu chargé:', place);
+                    console.log('Lieu chargé:', place);
 
                     // Masquer le loading et afficher le contenu
                     const loadingEl = document.getElementById('place-loading');
@@ -1056,7 +1056,7 @@ if (registerForm) {
                     loadReviews();
                 })
                 .catch(err => {
-                    console.error('❌ Erreur:', err);
+                    console.error('Erreur:', err);
                     const loadingEl = document.getElementById('place-loading');
                     const errorEl = document.getElementById('place-error');
                     
@@ -1115,7 +1115,7 @@ if (registerForm) {
         } else if (addReviewSection) {
             addReviewSection.innerHTML = `
                 <div class="login-prompt-content">
-                    <h3>💬 Connectez-vous pour laisser un avis</h3>
+                    <h3> Connectez-vous pour laisser un avis</h3>
                     <a href="login.html" class="btn btn-primary">Se connecter</a>
                 </div>
             `;

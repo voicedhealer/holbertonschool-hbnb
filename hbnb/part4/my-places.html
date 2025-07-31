@@ -37,7 +37,7 @@
             <div class="my-places-header">
                 <h2>Mes lieux</h2>
                 <a href="create-place.html" id="create-place-btn" class="btn btn-primary">
-                    ➕ Créer un nouveau lieu
+                     Créer un nouveau lieu
                 </a>
             </div>
 
@@ -87,7 +87,7 @@
             <h3>Confirmer la suppression</h3>
             <p>Êtes-vous sûr de vouloir supprimer ce lieu ?</p>
             <p><strong id="delete-place-name"></strong></p>
-            <p class="warning-text">⚠️ Cette action est irréversible</p>
+            <p class="warning-text"> Cette action est irréversible</p>
             <div class="modal-actions">
                 <button id="cancel-delete" class="btn btn-secondary">Annuler</button>
                 <button id="confirm-delete" class="btn btn-danger">Supprimer</button>
@@ -103,9 +103,9 @@
 
     <script src="scripts.js"></script>
     <script>
-    // ✅ NOUVELLE LOGIQUE AVEC COOKIES JWT
+
     window.onload = function() {
-        // ✅ Fonction pour lire les cookies (comme dans scripts.js)
+        // Fonction pour lire les cookies (comme dans scripts.js)
         function getCookie(name) {
             const value = `; ${document.cookie}`;
             const parts = value.split(`; ${name}=`);
@@ -113,7 +113,7 @@
             return null;
         }
 
-        // ✅ Fonction pour vérifier si l'utilisateur est propriétaire
+        // Fonction pour vérifier si l'utilisateur est propriétaire
         function isOwner(role) {
             if (!role) return false;
             const cleanRole = role.toString().toLowerCase().trim();
@@ -121,7 +121,7 @@
             return ownerRoles.includes(cleanRole);
         }
 
-        // ✅ Récupérer le JWT au lieu de localStorage
+        // Récupérer le JWT au lieu de localStorage
         const jwt = getCookie('jwt');
         
         console.log('=== DEBUG MY-PLACES ===');
@@ -129,12 +129,12 @@
         console.log('========================');
         
         if (!jwt) {
-            console.log('❌ Pas de JWT, redirection vers login');
+            console.log(' Pas de JWT, redirection vers login');
             window.location.href = "login.html";
             return;
         }
 
-        // ✅ Décoder le JWT pour récupérer les informations utilisateur
+        // Décoder le JWT pour récupérer les informations utilisateur
         try {
             const tokenParts = jwt.split('.');
             const payload = JSON.parse(atob(tokenParts[1]));
@@ -142,9 +142,9 @@
             console.log('Utilisateur décodé:', payload);
             console.log('Rôle utilisateur:', payload.role);
             
-            // ✅ Vérifier si l'utilisateur est propriétaire
+            // Vérifier si l'utilisateur est propriétaire
             if (!isOwner(payload.role)) {
-                console.log('❌ Utilisateur non propriétaire');
+                console.log(' Utilisateur non propriétaire');
                 document.body.innerHTML =
                     '<div style="margin:3rem auto;max-width:400px;text-align:center">' +
                     '<h2>Accès refusé</h2>' +
@@ -154,9 +154,9 @@
                 return;
             }
 
-            console.log('✅ Utilisateur propriétaire confirmé');
+            console.log('Utilisateur propriétaire confirmé');
 
-            // ✅ Afficher les éléments de navigation et profil
+            // Afficher les éléments de navigation et profil
             const createLink = document.getElementById("create-place-link");
             const myPlacesLink = document.getElementById("my-places-link");
             const loginBtn = document.getElementById("login-link");

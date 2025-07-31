@@ -62,7 +62,7 @@ class Me(Resource):
         user = facade.get_user(user_id)
         if not user:
             abort(404, "Utilisateur inconnu")
-        return user.to_dict(), 200
+        return user_id.to_dict(), 200
 
 # --- REGISTER : POST /api/v1/users/register ---
 @api.route('/register')
@@ -271,7 +271,7 @@ class UserResource(Resource):
             if not user:
                 return {'error': 'User not found'}, 404
             
-            user_dict = user.to_dict()
+            user_dict = user_id.to_dict()
             
             print(f"=== GET USER {user_id} ===")
             print(f"Email: {user_dict.get('email')}")

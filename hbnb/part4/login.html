@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="login-page">
-    <!-- HEADER SIMPLIFIÉ POUR LA PAGE LOGIN -->
+    <!-- HEADER POUR LA PAGE LOGIN -->
     <header class="login-header">
         <nav>
             <div class="nav-container">
@@ -25,7 +25,7 @@
 
     <main class="login-main">
         <div class="login-wrapper">
-            <!-- CARD DE CONNEXION MODERNE -->
+            <!-- CARD DE CONNEXION -->
             <div class="login-card">
 
                 <div class="login-header-content">
@@ -88,8 +88,8 @@
                         <a href="index.html" class="discover-link">Découvrez nos lieux</a>
                     </p>
                 </div>
-            </div> <!-- .login-card -->
-        </div> <!-- .login-wrapper -->
+            </div>
+        </div> 
     </main>
 
     <script src="scripts.js"></script>
@@ -113,7 +113,7 @@
             if (resp.ok && data.token && data.user) {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
-                // Option : afficher un message succès court puis rediriger
+
                 document.getElementById('login-success').style.display='block';
                 document.getElementById('login-success').textContent = `Bienvenue, ${data.user.first_name} !`;
                 setTimeout(() => window.location.href = "index.html", 800);
