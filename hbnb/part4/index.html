@@ -7,24 +7,28 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- ✅ HEADER AVEC SEULEMENT LE LOGO -->
+    <!-- HEADER -->
     <header>
         <nav>
             <div class="nav-container">
-                <!-- ✅ Seulement le logo, pas de texte -->
                 <div class="nav-brand">
                     <a href="index.html">
-                        <img src="/part4/images/logo.png" alt="HBnB" class="logo">
+                        <img src="/hbnb/part4/images/logo.png" alt="HBnB" class="logo">
                     </a>
                 </div>
                 <div class="nav-links">
                     <a href="index.html" class="active">Accueil</a>
-                    <a href="create-place.html">Créer un lieu</a>
-                    <a href="my-places.html">Mes lieux</a>
-                    <a href="#" class="login-button">Connexion</a>
+                    <!-- ✅ PLUS BESOIN DE CES LIENS ICI, scripts.js s'en occupe -->
+                    <a href="#" id="login-link" class="login-button">Connexion</a>
+                    <a href="#" id="logout-link" class="logout-button" style="display:none;">Déconnexion</a>
+                </div>
+                <!-- Profil utilisateur dynamique -->
+                <div class="user-profile" id="user-profile" style="display:none;">
+                    <img id="profile-img" src="" alt="profil" class="profile-img" style="display:none;">
+                    <span id="user-name"></span>
+                    <span id="user-role" class="user-role-pill"></span>
                 </div>
             </div>
-            
         </nav>
     </header>
 
@@ -51,6 +55,7 @@
         </div>
     </footer>
 
+    <!-- ✅ SEULEMENT scripts.js, PAS de script inline -->
     <script src="scripts.js"></script>
 </body>
 </html>

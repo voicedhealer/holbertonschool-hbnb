@@ -14,41 +14,51 @@ def create_app(config_class="app.config.DevelopmentConfig"):
     """
     app = Flask(__name__)
     app.config.from_object(config_class)
-    # 1. On initialise les extensions
+
+    # 1. Init extensions
     db.init_app(app)
     bcrypt.init_app(app)
     jwt.init_app(app)
-    
-    # 2. On enregistre les blueprints ou les namespaces
+
+    # 2. Import namespaces API localement pour éviter les circular imports
     from app.api.v1.users import api as users_ns
     from app.api.v1.amenities import api as amenities_ns
     from app.api.v1.places import api as places_ns
     from app.api.v1.reviews import api as reviews_ns
+
+    # Optionnel : gestion CORS si besoin front séparé
+    # from flask_cors import CORS
+    # CORS(app)
 
     authorizations = {
         'jwt': {
             'type': 'apiKey',
             'in': 'header',
             'name': 'Authorization',
-            'description': "Entrez 'Bearer <token>' pour l'authentification. Exemple: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'"
+            'description': "Entrez 'Bearer <token>' pour l'authentification."
         }
     }
 
-    api = Api(app, version='1.0', title='HBnB API', description='HBnB Application API',
-               authorizations=authorizations, security='jwt')
-    
-    # Enregistrement des namespaces
-    # Le chemin est déjà dans le namespace, pas besoin de le redéfinir ici
-    api.add_namespace(users_ns)
-    api.add_namespace(amenities_ns)
-    api.add_namespace(places_ns)
-    api.add_namespace(reviews_ns)
-    # 3. On configure les routes de l'application
+    api = Api(
+        app,
+        version='1.0',
+        title='HBnB API',
+        description='HBnB Application API',
+        authorizations=authorizations,
+        security='jwt'
+    )
+
+    # 3. Ajout namespaces (vérifie bien que chaque namespace a un path déclaré, si non, ajoute-le ici)
+    api.add_namespace(users_ns, path='/api/v1/users')
+    api.add_namespace(amenities_ns, path='/api/v1/amenities')
+    api.add_namespace(places_ns, path='/api/v1/places')
+    api.add_namespace(reviews_ns, path='/api/v1/reviews')
+
+    # 4. Commande CLI pour initialiser la base
     @app.cli.command("init-db")
     def init_db_command():
         """Crée toutes les tables de la base de données."""
         with app.app_context():
-            # On importe les modèles ici pour être sûr qu'ils sont connus de SQLAlchemy
             from app.models.user import User
             from app.models.place import Place
             from app.models.review import Review

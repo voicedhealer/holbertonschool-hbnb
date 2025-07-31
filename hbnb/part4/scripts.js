@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // -----------------------------------------
+    // -----------------------------------
     // OUTIL : lire un cookie par son nom
-    // -----------------------------------------
+    // -----------------------------------
     function getCookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ✅ FONCTION DE CONNEXION RAPIDE POUR LES COMPTES DE TEST
+    // FONCTION DE CONNEXION RAPIDE POUR LES COMPTES DE TEST
     window.quickLogin = function(email, password) {
         // Pré-remplir les champs
         document.getElementById('email').value = email;
@@ -57,9 +57,93 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // -----------------------------------------
+// --------------------------------------------
+// GESTION NAVIGATION SELON LE RÔLE UTILISATEUR  
+// --------------------------------------------
+if (jwt) {
+    // Décoder le JWT pour récupérer les informations utilisateur
+    try {
+        const tokenParts = jwt.split('.');
+        const payload = JSON.parse(atob(tokenParts[1]));
+        
+        // ✅ DEBUG COMPLET pour identifier le problème
+        console.log('=== DEBUG NAVIGATION SCRIPTS.JS ===');
+        console.log('Payload JWT:', payload);
+        console.log('Rôle brut:', payload.role);
+        console.log('Type du rôle:', typeof payload.role);
+        console.log('==============================');
+        
+        const userRole = payload.role;
+        
+        // ✅ VÉRIFICATION ROBUSTE DU RÔLE PROPRIÉTAIRE
+        if (isOwner(userRole)) {
+            console.log('✅ Utilisateur reconnu comme propriétaire');
+            addOwnerNavigation();
+        } else {
+            console.log('❌ Utilisateur non reconnu comme propriétaire. Rôle:', userRole);
+        }
+    } catch (e) {
+        console.error('Erreur décodage JWT pour navigation:', e);
+    }
+}
+
+// ✅ FONCTION UNIVERSELLE DE VÉRIFICATION DU RÔLE
+function isOwner(role) {
+    if (!role) {
+        console.log('Rôle vide ou undefined');
+        return false;
+    }
+    
+    const cleanRole = role.toString().toLowerCase().trim();
+    const ownerRoles = ['owner', 'propriétaire', 'proprietaire', 'propri'];
+    
+    console.log('Rôle nettoyé:', cleanRole);
+    console.log('Est propriétaire:', ownerRoles.includes(cleanRole));
+    
+    return ownerRoles.includes(cleanRole);
+}
+
+function addOwnerNavigation() {
+    const nav = document.querySelector('.nav-container');
+    if (nav && !document.getElementById('owner-nav-added')) {
+        console.log('🏠 Ajout des liens propriétaire dans la navigation');
+        
+        const ownerLinks = document.createElement('div');
+        ownerLinks.id = 'owner-nav-added';
+        ownerLinks.className = 'owner-navigation';
+        ownerLinks.innerHTML = `
+            <a href="create-place.html" class="nav-link owner-link">
+                ➕ Créer un lieu
+            </a>
+            <a href="my-places.html" class="nav-link owner-link">
+                🏠 Mes lieux
+            </a>
+        `;
+        
+        // Insérer avant le bouton de connexion/déconnexion
+        const loginBtn = document.querySelector('.login-button');
+        if (loginBtn) {
+            nav.insertBefore(ownerLinks, loginBtn);
+        } else {
+            // Si pas de bouton login, ajouter à la fin de nav-links
+            const navLinks = document.querySelector('.nav-links');
+            if (navLinks) {
+                navLinks.appendChild(ownerLinks);
+            }
+        }
+        
+        console.log('✅ Liens propriétaire ajoutés avec succès');
+    } else if (document.getElementById('owner-nav-added')) {
+        console.log('ℹ️ Liens propriétaire déjà présents');
+    } else {
+        console.log('❌ Navigation container non trouvé');
+    }
+}
+
+
+    // ---------------------------------------------------
     // PAGE LOGIN : gestion formulaire connexion + erreurs
-    // -----------------------------------------
+    // ---------------------------------------------------
     const loginForm = document.getElementById('login-form');
     const loginError = document.getElementById('login-error');
     if (loginForm) {
@@ -105,9 +189,146 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // -----------------------------------------
+// -------------------------------------------------
+// ✅ PAGE REGISTER : gestion formulaire inscription
+// -------------------------------------------------
+const registerForm = document.getElementById('register-form');
+const registerError = document.getElementById('register-error');
+const registerSuccess = document.getElementById('register-success');
+
+if (registerForm) {
+    registerForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        // Récupération des données du formulaire
+        const formData = {
+            first_name: document.getElementById('first_name').value.trim(),
+            last_name: document.getElementById('last_name').value.trim(),
+            username: document.getElementById('username').value.trim(),
+            email: document.getElementById('email').value.trim(),
+            password: document.getElementById('password').value,
+            role: document.getElementById('role').value
+        };
+
+        // Validation basique côté client
+        if (!formData.first_name || !formData.last_name || !formData.username || !formData.email || !formData.password) {
+            if (registerError) {
+                registerError.textContent = 'Tous les champs sont obligatoires';
+                registerError.style.display = 'block';
+            }
+            return;
+        }
+
+        try {
+            // Masquer les messages précédents
+            if (registerError) registerError.style.display = 'none';
+            if (registerSuccess) registerSuccess.style.display = 'none';
+
+            // Désactiver le bouton pendant la requête
+            const submitButton = registerForm.querySelector('button[type="submit"]');
+            const originalText = submitButton?.textContent || 'S\'inscrire';
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.textContent = 'Inscription en cours...';
+            }
+
+            const response = await fetch('http://localhost:5001/api/v1/users/register', {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                
+                // ✅ CONNEXION AUTOMATIQUE après inscription
+                try {
+                    if (registerSuccess) {
+                        registerSuccess.textContent = 'Inscription réussie ! Connexion automatique...';
+                        registerSuccess.style.display = 'block';
+                    }
+                    
+                    const loginResponse = await fetch('http://localhost:5001/api/v1/users/login', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            username: formData.email, // Utilise l'email comme username
+                            password: formData.password
+                        })
+                    });
+                    
+                    if (loginResponse.ok) {
+                        const loginData = await loginResponse.json();
+                        if (loginData.token) {
+                            document.cookie = `jwt=${loginData.token}; path=/; SameSite=Lax`;
+                            
+                            if (registerSuccess) {
+                                registerSuccess.textContent = 'Inscription et connexion réussies ! Redirection...';
+                                registerSuccess.style.display = 'block';
+                            }
+                            
+                            // Réinitialiser le formulaire
+                            registerForm.reset();
+                            
+                            setTimeout(() => {
+                                window.location.href = 'index.html';
+                            }, 1500);
+                            return;
+                        }
+                    }
+                } catch (loginError) {
+                    console.log('Connexion automatique échouée, redirection vers login');
+                }
+                
+                // Si la connexion automatique échoue, comportement normal
+                if (registerSuccess) {
+                    registerSuccess.textContent = 'Inscription réussie ! Vous pouvez maintenant vous connecter.';
+                    registerSuccess.style.display = 'block';
+                }
+                
+                // Réinitialiser le formulaire
+                registerForm.reset();
+                
+                // Rediriger vers la page de connexion après 2 secondes
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+
+            } else {
+                let errorMsg = 'Erreur lors de l\'inscription';
+                try {
+                    const errorData = await response.json();
+                    if (errorData.error) {
+                        errorMsg = errorData.error;
+                    } else if (errorData.message) {
+                        errorMsg = errorData.message;
+                    }
+                } catch (_) {}
+                
+                throw new Error(errorMsg);
+            }
+        } catch (error) {
+            console.error('Erreur inscription:', error);
+            if (registerError) {
+                registerError.textContent = error.message || "Erreur de connexion au serveur";
+                registerError.style.display = 'block';
+            }
+        } finally {
+            // Réactiver le bouton
+            const submitButton = registerForm.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = originalText;
+            }
+        }
+    });
+}
+
+    // ---------------------------------------------------------------
     // PAGE ACCUEIL (index.html) : affichage lieux + filtrage par prix
-    // -----------------------------------------
+    // ---------------------------------------------------------------
     const placesList = document.getElementById('places-list');
     const priceFilter = document.getElementById('price-filter');
 
@@ -160,9 +381,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    // -----------------------------------------
+    // -------------------------------------------------------------
     // ✅ PAGE CREATE PLACE - Formulaire de création avec validation
-    // -----------------------------------------
+    // -------------------------------------------------------------
     const createPlaceForm = document.getElementById('create-place-form');
     const createPlaceError = document.getElementById('create-place-error');
     const createPlaceSuccess = document.getElementById('create-place-success');
@@ -418,9 +639,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // -----------------------------------------
+    // ---------------------------------------------------------------------
     // ✅ PAGE MES LIEUX (my-places.html) - MAINTENANT DANS DOMContentLoaded
-    // -----------------------------------------
+    // ---------------------------------------------------------------------
     const myPlacesList = document.getElementById('my-places-list');
     const myPlacesStats = document.getElementById('my-places-stats');
     const noPlacesMessage = document.getElementById('no-places-message');
@@ -624,9 +845,9 @@ document.addEventListener('DOMContentLoaded', () => {
         loadMyPlaces();
     }
 
-    // -----------------------------------------
+    // -----------------------------------------------------------------------
     // ✅ PAGE EDIT PLACE (edit-place.html) - MAINTENANT DANS DOMContentLoaded  
-    // -----------------------------------------
+    // -----------------------------------------------------------------------
     const editPlaceForm = document.getElementById('edit-place-form');
     const editPlaceError = document.getElementById('edit-place-error');
     const editPlaceSuccess = document.getElementById('edit-place-success');
@@ -745,7 +966,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // ✅ FONCTION LOADREVIEWS AMÉLIORÉE INTÉGRÉE
         function loadReviews() {
             console.log('💬 Chargement des avis...');
             
@@ -833,7 +1053,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         `;
                     }
 
-                    // ✅ APPELER LA FONCTION LOADREVIEWS AMÉLIORÉE
                     loadReviews();
                 })
                 .catch(err => {
@@ -886,7 +1105,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         })
                         .then(() => {
                             reviewForm.reset();
-                            // Recharger les avis avec la fonction améliorée
                             loadReviews();
                         })
                         .catch(err => {

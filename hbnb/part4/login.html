@@ -7,16 +7,15 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body class="login-page">
-    <!-- ✅ HEADER SIMPLIFIÉ POUR LA PAGE LOGIN -->
+    <!-- HEADER SIMPLIFIÉ POUR LA PAGE LOGIN -->
     <header class="login-header">
         <nav>
             <div class="nav-container">
                 <div class="nav-brand">
                     <a href="index.html">
-                        <img src="/part4/images/logo.png" alt="HBnB" class="logo">
+                        <img src="/hbnb/part4/images/logo.png" alt="HBnB" class="logo">
                     </a>
                 </div>
-                <!-- ✅ Navigation simplifiée - PAS de bouton connexion -->
                 <div class="nav-links">
                     <a href="index.html">← Retour à l'accueil</a>
                 </div>
@@ -26,72 +25,114 @@
 
     <main class="login-main">
         <div class="login-wrapper">
-            <!-- ✅ CARD DE CONNEXION MODERNE -->
+            <!-- CARD DE CONNEXION MODERNE -->
             <div class="login-card">
+
                 <div class="login-header-content">
-                    <h1>Bon retour !</h1>
+                    <h1>Bon retour&nbsp;!</h1>
                     <p>Connectez-vous à votre compte HBnB</p>
                 </div>
 
                 <!-- Messages d'état -->
-                <div id="login-error" class="error-message" style="display: none;"></div>
+                <div id="login-error" class="error-message" style="display:none"></div>
+                <div id="login-success" class="success-message" style="display:none"></div>
 
-                <form id="login-form" class="login-form">
+                <form id="login-form" class="login-form" autocomplete="on">
                     <div class="input-group">
                         <label for="email">Adresse email</label>
-                        <input type="email" id="email" name="email" required 
-                               placeholder="votre@email.com">
+                        <input type="email" id="email" name="email" autocomplete="email" required placeholder="votre@email.com">
                     </div>
-
                     <div class="input-group">
                         <label for="password">Mot de passe</label>
-                        <input type="password" id="password" name="password" required 
-                               placeholder="••••••••">
+                        <input type="password" id="password" name="password" autocomplete="current-password" required placeholder="••••••••">
                     </div>
-
-                    <button type="submit" class="login-button-submit">
-                        Se connecter
-                    </button>
+                    <button type="submit" class="login-button-submit">Se connecter</button>
                 </form>
 
-                <!-- ✅ DIVIDER UNIQUE -->
-                <div class="login-divider">
-                    <span>ou</span>
-                </div>
+                <!-- DIVIDER -->
+                <div class="login-divider"><span>ou</span></div>
 
-                <!-- ✅ SECTION COMPTES DE TEST (qui manquait) -->
-                <div class="test-accounts-section">
+                <!-- SECTION COMPTES DE TEST -->
+                <!--<div class="test-accounts-section">
                     <h3>🧪 Comptes de test</h3>
                     <div class="test-accounts-grid">
                         <div class="test-account-card" onclick="quickLogin('alice@example.com', 'password')">
-                            <div class="test-account-avatar">👩‍💼</div>
+                            <div class="test-account-avatar" aria-label="Alice Doe" title="Alice Doe">👩‍💼</div>
                             <div class="test-account-info">
                                 <strong>Alice Doe</strong>
                                 <span>Propriétaire</span>
                             </div>
                         </div>
                         <div class="test-account-card" onclick="quickLogin('bob@example.com', 'password')">
-                            <div class="test-account-avatar">👨‍💻</div>
+                            <div class="test-account-avatar" aria-label="Bob Smith" title="Bob Smith">👨‍💻</div>
                             <div class="test-account-info">
                                 <strong>Bob Smith</strong>
                                 <span>Voyageur</span>
                             </div>
                         </div>
                     </div>
-                </div>
+                </div-->
 
-                <!-- ✅ SECTION DÉCOUVERTE INTÉGRÉE DANS LA CARD -->
-                <div class="login-discover-section">
-                    <p class="discover-text">
-                        Première visite ? 
-                        <a href="index.html" class="discover-link">Découvrez nos lieux</a>
+                <!-- SECTION INSCRIPTION (register) -->
+                <div class="register-section">
+                    <p class="register-text">
+                        Pas encore de compte ?
+                        <a href="register.html" class="register-link">Créer un compte</a>
                     </p>
                 </div>
 
-            </div> <!-- ✅ Fermeture correcte de login-card -->
-        </div> <!-- ✅ Fermeture correcte de login-wrapper -->
+                <!-- DÉCOUVERTE -->
+                <div class="login-discover-section">
+                    <p class="discover-text">
+                        Première visite ?
+                        <a href="index.html" class="discover-link">Découvrez nos lieux</a>
+                    </p>
+                </div>
+            </div> <!-- .login-card -->
+        </div> <!-- .login-wrapper -->
     </main>
 
     <script src="scripts.js"></script>
+    <script>
+    // Gestion connexion moderne
+    document.getElementById('login-form').onsubmit = async function(e) {
+        e.preventDefault();
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+
+        // Efface l’erreur précédente
+        document.getElementById('login-error').style.display='none';
+
+        try {
+            const resp = await fetch('/api/v1/auth/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({email, password})
+            });
+            const data = await resp.json();
+            if (resp.ok && data.token && data.user) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                // Option : afficher un message succès court puis rediriger
+                document.getElementById('login-success').style.display='block';
+                document.getElementById('login-success').textContent = `Bienvenue, ${data.user.first_name} !`;
+                setTimeout(() => window.location.href = "index.html", 800);
+            } else {
+                document.getElementById('login-error').style.display='block';
+                document.getElementById('login-error').textContent = data.error || "Échec de la connexion.";
+            }
+        } catch (err) {
+            document.getElementById('login-error').style.display='block';
+            document.getElementById('login-error').textContent = "Erreur réseau ou serveur.";
+        }
+    };
+
+    // Gestion login rapide (comptes de test)
+    function quickLogin(email, password) {
+        document.getElementById('email').value = email;
+        document.getElementById('password').value = password;
+        document.getElementById('login-form').dispatchEvent(new Event('submit', {'bubbles':true}));
+    }
+    </script>
 </body>
 </html>

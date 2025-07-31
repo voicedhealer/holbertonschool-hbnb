@@ -16,7 +16,7 @@ review_output_model = api.model('ReviewOut', {
     'text': fields.String(),
     'rating': fields.Integer(),
     'user_id': fields.String(),
-    'user_name': fields.String(),  # ← Ajouté pour le frontend
+    'user_name': fields.String(),
     'place_id': fields.String()
 })
 
@@ -39,7 +39,7 @@ def review_to_dict(review):
         'text': review.text,
         'rating': review.rating,
         'user_id': str(review.user_id),
-        'user_name': user_name,  # ← Nouveau champ pour le frontend
+        'user_name': user_name,
         'place_id': str(review.place_id)
     }
 
@@ -108,7 +108,7 @@ class ReviewResource(Resource):
 
 @api.route('/places/<place_id>/reviews/')
 class PlaceReviewList(Resource):
-    def get(self, place_id):  # ← Supprimé @api.marshal_list_with
+    def get(self, place_id):
         reviews = HBnBFacade().get_reviews_by_place(place_id)
         if reviews is None:
             return {'error': 'Place not found'}, 404
@@ -118,7 +118,7 @@ class PlaceReviewList(Resource):
     @api.response(201, 'Review created')
     @api.response(400, 'Invalid input')
     @jwt_required()
-    def post(self, place_id):  # ← Nouvelle méthode pour créer un avis
+    def post(self, place_id):
         """Créer un avis pour un lieu spécifique"""
         claims = get_jwt()
         current_user_id = claims.get('sub')

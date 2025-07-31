@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer un compte - HBnB</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="register-page">
+    <header class="login-header">
+        <nav>
+            <div class="nav-container">
+                <div class="nav-brand">
+                    <a href="index.html">
+                        <img src="/hbnb/part4/images/logo.png" alt="HBnB" class="logo">
+                    </a>
+                </div>
+                <div class="nav-links">
+                    <a href="login.html">← Retour à la connexion</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="login-main">
+        <div class="login-wrapper">
+            <div class="login-card">
+                <div class="login-header-content">
+                    <h1>Créer un compte</h1>
+                    <p>Rejoignez la communauté HBnB !</p>
+                </div>
+
+                <div id="register-error" class="error-message" style="display:none"></div>
+                <div id="register-success" class="success-message" style="display:none"></div>
+
+                <form id="register-form" class="login-form" autocomplete="on">
+                    <div class="input-group">
+                        <label for="first_name">Prénom</label>
+                        <input type="text" id="first_name" name="first_name" required placeholder="Votre prénom">
+                    </div>
+                    <div class="input-group">
+                        <label for="last_name">Nom</label>
+                        <input type="text" id="last_name" name="last_name" required placeholder="Votre nom">
+                    </div>
+                    <div class="input-group">
+                        <label for="email">Adresse email</label>
+                        <input type="email" id="email" name="email" required placeholder="votre@email.com">
+                    </div>
+                    <div class="input-group">
+                        <label for="username">Nom d’utilisateur</label>
+                        <input type="text" id="username" name="username" required placeholder="Pseudo unique">
+                    </div>
+                    <div class="input-group">
+                        <label for="password">Mot de passe</label>
+                        <input type="password" id="password" name="password" required placeholder="••••••••">
+                    </div>
+                    <div class="input-group">
+                        <label for="role">Je m’inscris en tant que :</label>
+                        <select id="role" name="role" required>
+                            <option value="owner">Propriétaire</option>
+                            <option value="voyageur">Voyageur</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="login-button-submit">Créer mon compte</button>
+                </form>
+
+                <div class="login-discover-section" style="margin-top:2rem;">
+                    <p>
+                        Déjà un compte ? <a href="login.html" class="discover-link">Se connecter</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="scripts.js"></script>
+    <script>
+    document.getElementById('register-form').onsubmit = async function(e) {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(e.target).entries());
+        document.getElementById('register-error').style.display = "none";
+        document.getElementById('register-success').style.display = "none";
+        try {
+            const resp = await fetch('/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            if (resp.ok) {
+                document.getElementById('register-success').style.display = "block";
+                document.getElementById('register-success').textContent = "Votre compte a été créé ! Vous pouvez vous connecter.";
+                setTimeout(() => window.location.href = "login.html", 1200);
+            } else {
+                const err = await resp.json();
+                document.getElementById('register-error').style.display = "block";
+                document.getElementById('register-error').textContent = err.error || "Impossible de créer le compte.";
+            }
+        } catch (e) {
+            document.getElementById('register-error').style.display = "block";
+            document.getElementById('register-error').textContent = "Erreur réseau ou serveur.";
+        }
+    };
+    </script>
+</body>
+</html>

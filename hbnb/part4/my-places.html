@@ -10,12 +10,23 @@
     <header>
         <nav>
             <div class="nav-container">
-                <h1><a href="index.html">HBnB</a></h1>
+                <div class="nav-brand">
+                    <a href="index.html">
+                        <img src="/hbnb/part4/images/logo.png" alt="HBnB" class="logo">
+                    </a>
+                </div>
                 <div class="nav-links">
                     <a href="index.html">Accueil</a>
-                    <a href="create-place.html">Créer un lieu</a>
-                    <a href="my-places.html" class="active">Mes lieux</a>
-                    <a href="#" class="login-button">Connexion</a>
+                    <a href="create-place.html" id="create-place-link">Créer un lieu</a>
+                    <a href="my-places.html" id="my-places-link" class="active">Mes lieux</a>
+                    <a href="#" id="login-link" class="login-button">Connexion</a>
+                    <a href="#" id="logout-link" class="logout-button" style="display:none;">Déconnexion</a>
+                </div>
+                <!-- Profil utilisateur -->
+                <div class="user-profile" id="user-profile" style="display:none;">
+                    <img id="profile-img" src="" alt="profil" class="profile-img" style="display:none;">
+                    <span id="user-name"></span>
+                    <span id="user-role" class="user-role-pill"></span>
                 </div>
             </div>
         </nav>
@@ -25,7 +36,7 @@
         <div class="container">
             <div class="my-places-header">
                 <h2>Mes lieux</h2>
-                <a href="create-place.html" class="btn btn-primary">
+                <a href="create-place.html" id="create-place-btn" class="btn btn-primary">
                     ➕ Créer un nouveau lieu
                 </a>
             </div>
@@ -62,7 +73,7 @@
                 <div class="no-places-content">
                     <h3>🏠 Vous n'avez encore aucun lieu</h3>
                     <p>Commencez dès maintenant à proposer votre logement !</p>
-                    <a href="create-place.html" class="btn btn-primary btn-large">
+                    <a href="create-place.html" id="create-first-place-btn" class="btn btn-primary btn-large">
                         Créer mon premier lieu
                     </a>
                 </div>
@@ -86,10 +97,114 @@
 
     <footer>
         <div class="container">
-            <p>&copy;Tous droits réservés.</p>
+            <p>&copy; 2025 HBnB. Tous droits réservés.</p>
         </div>
     </footer>
 
     <script src="scripts.js"></script>
+    <script>
+    // ✅ NOUVELLE LOGIQUE AVEC COOKIES JWT
+    window.onload = function() {
+        // ✅ Fonction pour lire les cookies (comme dans scripts.js)
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        // ✅ Fonction pour vérifier si l'utilisateur est propriétaire
+        function isOwner(role) {
+            if (!role) return false;
+            const cleanRole = role.toString().toLowerCase().trim();
+            const ownerRoles = ['owner', 'propriétaire', 'proprietaire'];
+            return ownerRoles.includes(cleanRole);
+        }
+
+        // ✅ Récupérer le JWT au lieu de localStorage
+        const jwt = getCookie('jwt');
+        
+        console.log('=== DEBUG MY-PLACES ===');
+        console.log('JWT trouvé:', jwt ? 'OUI' : 'NON');
+        console.log('========================');
+        
+        if (!jwt) {
+            console.log('❌ Pas de JWT, redirection vers login');
+            window.location.href = "login.html";
+            return;
+        }
+
+        // ✅ Décoder le JWT pour récupérer les informations utilisateur
+        try {
+            const tokenParts = jwt.split('.');
+            const payload = JSON.parse(atob(tokenParts[1]));
+            
+            console.log('Utilisateur décodé:', payload);
+            console.log('Rôle utilisateur:', payload.role);
+            
+            // ✅ Vérifier si l'utilisateur est propriétaire
+            if (!isOwner(payload.role)) {
+                console.log('❌ Utilisateur non propriétaire');
+                document.body.innerHTML =
+                    '<div style="margin:3rem auto;max-width:400px;text-align:center">' +
+                    '<h2>Accès refusé</h2>' +
+                    "<p>Cette page est réservée aux propriétaires.<br>" +
+                    "<a href='index.html'>Retour à l'accueil</a></p>" +
+                    '</div>';
+                return;
+            }
+
+            console.log('✅ Utilisateur propriétaire confirmé');
+
+            // ✅ Afficher les éléments de navigation et profil
+            const createLink = document.getElementById("create-place-link");
+            const myPlacesLink = document.getElementById("my-places-link");
+            const loginBtn = document.getElementById("login-link");
+            const logoutBtn = document.getElementById("logout-link");
+            const userProfile = document.getElementById("user-profile");
+            const userName = document.getElementById("user-name");
+            const userRole = document.getElementById("user-role");
+
+            if (createLink) createLink.style.display = "inline-block";
+            if (myPlacesLink) myPlacesLink.style.display = "inline-block";
+            
+            // Gestion login/logout
+            if (loginBtn) loginBtn.style.display = "none";
+            if (logoutBtn) logoutBtn.style.display = "inline-block";
+            
+            // Afficher le profil utilisateur
+            if (userProfile) {
+                userProfile.style.display = "flex";
+                if (userName) userName.textContent = payload.first_name || "Propriétaire";
+                if (userRole) {
+                    userRole.textContent = "Propriétaire";
+                    userRole.className = "user-role-pill role-owner";
+                }
+            }
+
+            // Gestion du logout
+            if (logoutBtn) {
+                logoutBtn.onclick = function(e) {
+                    e.preventDefault();
+                    document.cookie = "jwt=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Lax";
+                    localStorage.removeItem("token");
+                    localStorage.removeItem("user");
+                    window.location.href = "index.html";
+                };
+            }
+
+            // Afficher les boutons de création
+            const createBtn = document.getElementById("create-place-btn");
+            const firstBtn = document.getElementById("create-first-place-btn");
+            if (createBtn) createBtn.style.display = "inline-block";
+            if (firstBtn) firstBtn.style.display = "inline-block";
+
+        } catch (e) {
+            console.error('Erreur décodage JWT:', e);
+            window.location.href = "login.html";
+            return;
+        }
+    };
+    </script>
 </body>
 </html>
